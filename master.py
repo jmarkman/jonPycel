@@ -273,8 +273,15 @@ comparisonDic = {
     'Location Street Address: ':'Street 1'
 }
 
+clear = lambda: os.system('cls')
+clear()
+
 input_sov = input.ask()
 sov_sheet = input.findSheetName(input_sov)
 sov_data = input.loopAllRows(sov_sheet)
 header_row = input.identifyHeaderRow(sov_data, comparisonDic)
 
+header_row = modify.head_matcher(modify.comp_converter(comparisonDic), header_row, input_sov)
+sub_header_data = modify.sliceSubHeaderData(header_row, sov_sheet)
+head_sub_combine = modify.combine(header_row, sub_header_data)
+modify.setnwrite(head_sub_combine, input_sov)

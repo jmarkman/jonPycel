@@ -1,9 +1,5 @@
-import os
-import sys
-import xlwt
 import Tkinter
 import logging
-import subprocess
 from xlrd import open_workbook
 from unidecode import unidecode
 from tkFileDialog import askopenfilename
@@ -88,7 +84,7 @@ def identifyHeaderRow(numValsDict,comparisonDic):
 	"""
 	maxCap = 30 
 	rowNumber = 1
-	headerRowNum = 0 # 
+	headerRowNum = 0
 	while ((rowNumber < maxCap) and (rowNumber < len(numValsDict))):
 		row=numValsDict[rowNumber]
 		matchCounter = 0
@@ -108,52 +104,3 @@ def identifyHeaderRow(numValsDict,comparisonDic):
 	headerNum_Vals[headerRowNum]=numValsDict[headerRowNum]
 	return headerNum_Vals	
 
-def isEmptyRow(row):
-	"""If row is entirely empty 
-
-	Parameter: array of values ['one','two','three']
-	"""
-	
-	maxLength = len(row)
-	emptyCheck = []
-	for value in row:
-		if value == '':
-			emptyCheck.append(value)
-	if len(emptyCheck) == maxLength:
-		return True
-
-def sliceSubHeaderData(headerRowDict, sheet):
-	"""
-	Gets relevant data below header row
-
-	Parameter: headerRowDict: dictionary,
-	Parameter sheet: a Sheet object
-
-	Returns: data from below the header row
-	"""
-
-	dataRowStartNumber=headerRowDict.keys()[0]+1
-	allData=loopAllRows(sheet)
-	subHeadData={}
-	for key in allData:
-		isEmp=False
-		if isEmptyRow(allData[key])==True:
-			isEmp=True
-		else:
-			if key in range(dataRowStartNumber, len(allData)) and isEmp==False:
-				subHeadData[key]=allData[key]
-	return subHeadData
-
-def combine(headerRowDict,subHeaderData):
-	"""
-	Combines the header row and subheader row into a singular dictionary
-
-	Parameter: two dictionaries
-	Precondition: each dicitonary in {RowNumber: ['Value1','Value2','Value3'.....]}
-
-	Returns: combined dictionary in format like above^
-	"""
-
-	headSubCombined=headerRowDict.copy()
-	headSubCombined.update(subHeaderData)
-	return headSubCombined

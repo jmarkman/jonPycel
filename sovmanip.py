@@ -1,12 +1,5 @@
-import os
-import sys
-import xlwt
-import Tkinter
-import logging
-import subprocess
-from xlrd import open_workbook
+import os, sys, xlwt, logging, subprocess
 from unidecode import unidecode
-from tkFileDialog import askopenfilename
 
 """
 This program will take a an SOV of a specific template (right now just amrisc)
@@ -24,168 +17,7 @@ The "desktop" variable is hackneyed because os.path.expanduser can take a longer
 
 http://stackoverflow.com/questions/2953828/accessing-relative-path-in-python
 """
-def ask():
-	"""opens the file explorer allowing user to choose SOV to parse
 
-	Precondition: File is an SOV with a .xlsx or .xls file format
-	Returns: a singular item array(for possibility to later loop through multiple files, TBD) with the aboslute path of the file
-	
-	This function uses Tkinter to present the user with askopenfilename() to get the SoV. The function returns said file to the rest of the program.	
-	"""
-
-	root=Tkinter.Tk()
-	root.withdraw()
-	file = askopenfilename(initialdir = userhome)
-	file = [file]
-	print "FILE NAME: " + file[0]
-	return file
-
-def findSheetName(files):
-	"""find the sheet with the SOV through hierarchy guessing
-
-	Parameter file: array of absolute path
-	Returns: Sheet Object where the SOV should be on
-
-	This function takes the returned file from ask() and finds the sheet where all the info we need will be. It starts specifically and ends with simply accessing the first sheet in the workbook. It returns the sheet that meets one of these conditions in the try/except nest.
-	"""
-	# has to guess through them
-	for item in files:
-		print ("\n-------------------------------NEW FILE ---------------------------")
-		wb=open_workbook(item)
-		try:
-			sheet1=wb.sheet_by_name("SOV")
-		except:
-			try:
-				sheet1=wb.sheet_by_name("SOV-APP")
-			except:
-				try:
-					sheet1=wb.sheet_by_name("AmRisc SOV")
-				except:	
-					try:
-						sheet1=wb.sheet_by_name("BREAKDOWN")	
-					except:
-						try:
-							sheet1=wb.sheet_by_name("Property Schedule")
-						except:
-							try:
-								sheet1=wb.sheet_by_name("2015 Schedule")
-							except:
-								try:
-									sheet1=wb.sheet_by_name("Sheet1")
-								except:
-									sheet1=wb.sheet_by_index(0)
-		return sheet1
-	
-def loopAllRows(sheet):
-	"""Loops through all rows in the current sheet, formats the data
-
-	Parameter: A sheet object
-	Returns: Pure value data from the current sheet in {rowNumber: ['value1','value2','value3']} format
-	
-	The function starts with a solid definition for the number of rows in the sheet. Originally the ROWCAP variable used to be the total number of rows in the sheet via the sheet.nrows function, but was set to a static number for size/speed concerns. This will be used for our sentinel value for the definite loop used to iterate through the sheet returned from findSheetName(). After, it creates an empty dictionary assigned to the variable "totalPureData", where we will store an association with a number (zero-based) and a row's contents - see Greg's format comment above the declaration of the dictionary.
-
-	Once that is done, we launch into the loop. While the sentinel value "i" is less than the value assigned to ROWCAP, and if "i" is less than ROWCAP, store the row object at position sheet.row(i) in the variable "row". Create an array called "rowPureData" and for each cell object in the row object, store the value of that cell object in the array "rowPureData". 
-
-	Finally, assign the contents of that array to the key "i" in the dictionary "totalPureData". Increment "i" and continue the loop until the condition is met. Once the condition is met, return the dictionary.	
-	"""
-		
-	#ROWCAP=212
-	#maximum number of rows in the current sheet
-	ROWCAP=sheet.nrows
-	# jk for amrisc just cap at row 200
-	# SET THIS TO CHANGE THE ROW LOOP CAP
-	# ROWCAP=50
-
-
-	# format:   {0:['data1','data2'....]}
-	totalPureData = {}
-	i = 0
-	while i < ROWCAP:
-		#max number of rows in document for diagnostics
-		if (i < (ROWCAP)):
-			"""
-			Debug: print the current row number the loop is on to stdout
-
-			# print "\nCurrent Row Number: " + str(i+1)
-			
-			These are Cell objects, see xlrd documentation. Addendum by Jon: it's not just limited to xlrd, but is key to how Excel works. Each cell in the workbook is an object with a long list of attributes. When we enter a line of text, we're using a mutator to change the attributes of the cell object by adding a value to the "string" part of the cell object, and the format options in Excel try to cast an attribute of one type to another attribute of another type.
-			"""	
-			row = sheet.row(i)
-			# holds this specific rows pure data
-			rowPureData = []
-			for item in row:
-				rowPureData.append(item.value)
-			totalPureData[i] = rowPureData
-		i += 1
-	"""
-	Debug: Print the contents of the totalPureData dictionary to see what's inside of it
-
-	# for key,value in totalPureData.iteritems():
-	# 	print key,value
-	"""
-	# with open('E:\Work\Pycel\pycel2\output\loopAllRows().txt', 'w') as tpd:
-	# 	tpd.write("The contents of the dictionary totalPureData\n\n")
-	# 	for key, value in totalPureData.iteritems():
-	# 		tpd.write('{0}: {1}\n'.format(key, value))
-	return totalPureData
-
-def identifyHeaderRow(numValsDict,comparisonDic):
-	"""Identifies the header row
-
-	Parameter: Pure sheet data in a dictionary where key=rowNumber value=value array
-	Precondition: Header captions are in a singular row, and within the first 30 rows of the file
-	
-	maxCap refers to the total number of columns in the workstation that we can be sure of getting on the SoV. rowNumber is set to 1 because Excel works on a 1-based index instead of a programming-based index of 0. headerRowNum most likely deals with the dictionary numValsDict. 
-
-	The loop says "while the rowNumber is less than the maxCap and that same rowNumber is less than the length of the dictionary that was passed in as an argument to the identifyHeaderRow function:
-		- set the variable "row" equal to the element at [key] from the numValsDict dictionary
-		- declare a counter variable called "matchCounter" and set it to 0
-		- for each value in the row supplied, make sure that if it's in unicode, use the unidecode library to pre-clean the input just in case there's some rogue input
-		- after cleaning that value, if that value exists within the comparisonDic (key-value relationship), increment matchCounter by 1
-		- at that point, if matchCounter is greater than headerRowNum, set headerRowNum equal to rowNumber
-		- finally, increment rowNumber by 1
-	
-	Once the while loop runs its course, we spawn a new dictionary and assign the key to headerRowNum and put stuff from numValsDict inside of it. Finally, return that dictionary because that contains all of our header row numbers and values.
-	
-	"""
-
-	# THIS HINGES ON THIS SUBSTITUTION DICTIONARY
-	# TO SEE THE MATCHING ENABLE ALL PRINT STATEMENTS
-	# This matching is an assumption
-
-	maxCap = 30 
-	rowNumber = 1
-	headerRowNum = 0 # 
-	while ((rowNumber < maxCap) and (rowNumber < len(numValsDict))):
-		row=numValsDict[rowNumber]
-		matchCounter = 0
-		for value in row:
-			# because the dictionary is strings and lowercase keys and to deal with unicode
-			if type(value) == unicode:
-				# print "converting unicode"
-				value=unidecode(value)
-			value=str(value).lower()
-
-			# print "judging value: " +value
-			if value in comparisonDic:
-				matchCounter+=1
-				# print "matched row num: " +str(rowNumber)+" value: "+ value
-		if matchCounter>headerRowNum:
-			headerRowNum=rowNumber
-		
-		# increment
-		rowNumber+=1
-		# print "current Header row number: " +str(headerRowNum)
-
-
-	# print headerRowNum  #the header row number NOTE THIS IS 0 INDEXED
-	# print numValsDict[headerRowNum]    #data at headerRowNum
-
-	headerNum_Vals={}
-	headerNum_Vals[headerRowNum]=numValsDict[headerRowNum]
-	# print "\n\nHEADER ROW NUM AND VALUES"
-	# print headerNum_Vals
-	return headerNum_Vals	
 
 def isEmptyRow(row):
 	"""If row is entirely empty 
@@ -421,31 +253,23 @@ def physicalBuildingNum(final, caption):
 	print caption
 	try:
 		streetArr=final["Street 1"][0][:]
-		# print streetArr, caption
 		streetArr.pop(0)
 		numTracker=[caption]
 		for val in streetArr:
 			if len(val)>0:
 				space=val.find(" ")
 				dash=val.find("-")
-				# dash is found
 				if dash!=-1:
 					num=val[:dash]
 				else:
 					num=val[:space]
 				print "the numval %s" %(num)
-				# if this piece is actually a number
 				try:
-					# if num is actually a number
 					int(num)
 					numTracker.append(str(num))
 				except ValueError:
-					# shouldnt append if its not a number
 					pass
-		# Contents of Physcial Building # becomes Single Physical Building #
-		# -----Is this how it should work in terms of business rules?
 		if caption=='Single Physical Building #':
-			# print 'EXECUTING'
 			final[caption]=final['Physical Building #'][:]
 		else:
 			final[caption]=[numTracker]
@@ -481,29 +305,13 @@ def nonePlacer(final, headerName):
 	toWriteRow[0]=headerName
 	final[headerName].append(toWriteRow)
 
-
-	# # print 'EXECUTING NONEPLACER'
-	# rowToAppend=[]
-	# # add the header name to index 0 of to be appended column
-	# rowToAppend.append(headerName)
-	# # assumption that state is going to be full
-	# for row in range(len(final["State"][0])):
-	# 	rowToAppend.append("None")
-	# # drop a None because of the offset with the headerName
-	# rowToAppend.pop(-1)
-	# # realign
-	# final[headerName].append(rowToAppend)
-	# # print final[headerName]
-
 def wprhY(final, headerName):
 	"""For wiring, plumbing, roofing, heating year. If emtpy fill their contents with the 
 	data from Year Built, else does nothing """
 
 	if final['Year Built']!=[]:
-		# copy the list because pointers
 		arr=final['Year Built'][:]
 		final[headerName]=arr
-		# no need to return, modifes the hashtable directly
 
 def statesConverter(final, headerName):
 	"""Converts state abbreviation into full name """
@@ -527,7 +335,6 @@ def isColEmpty(columnVals):
 		print "%s is totally empty" %(columnVals)
 		return True
 
-	# if it's a double array
 	notEmptyCount=0
 	for ArrayOrVal in columnVals:
 		if type(ArrayOrVal)==list:
@@ -562,16 +369,11 @@ def setnwrite (headSubCombined, fileName):
 
 	minimum= min(headSubCombined, key=headSubCombined.get)-1
 	headerRow= headSubCombined[minimum]
-	#sov_index will look like - <SOVIndex>:True - if that columns needs to end up in the workstation
 	sov_index={}
-	# Identify Fixed SOVHeader Rows needed to switch
 	for itemIndex in range(len(headerRow)):
-		# if header value belongs in workstation
 		if headerRow[itemIndex] in amrisc:
-			# flag the column index to be appended
 			sov_index[itemIndex]= True
 
-	# compresses sov data that needs to be written into column format
 	columnDict={}
 	for index in sov_index:
 		column=[]
@@ -579,18 +381,12 @@ def setnwrite (headSubCombined, fileName):
 			column.append(item[index])
 		columnDict[column[0]]=column
 
-	# combines SOV columns with workstation columns
 	for key in columnDict:
 		if amrisc[key] in work:
 			final[amrisc[key]].append(columnDict[key])
 
-	# does the adjustments
 	final = adjustments(final)
-	# for notice can use isColEmpty to see if column is empty(defined as header but no data)
 
-	# Jon: added file name to writer params for usage in writer()'s save function since there
-	# was no way to access the name of the spreadsheet otherwise in that method. Maybe this can
-	# be set to a global variable 
 	writer(final, work, workHeaderRow, amrisc, fileName)
 
 
@@ -602,86 +398,35 @@ def writer(final, workDict, workHeaderRow, amrisc, sovFileName):
 	# sheet = workbook.add_sheet("WKFC_Sheet1", cell_overwrite_ok=True)
 	sheet = workbook.add_sheet("WKFC_Sheet1")
 
-	# see all the data
 	for key, values in final.iteritems():
 		colIndex=workDict[key]
-		wordWrap = xlwt.easyxf('align: wrap on, horiz center') # provides access to formatting features
+		wordWrap = xlwt.easyxf('align: wrap on, horiz center')
 
 		if values==[]:
-			# if no data found in SOV,  put the workstation header name instead
 			sheet.write(0,colIndex,key, wordWrap)
 			sheet.col(colIndex).width = 365 * (16)
 		else:
-			# because values is a double array
 			valueArr = values[0]
 			for rowIndex in range(len(valueArr)):
-				# write the header from Workstation rather than SOV
 				if valueArr[rowIndex] in amrisc:
-					# print "I matched in the template!"
 					sheet.write(rowIndex,colIndex, key, wordWrap)
 					sheet.col(colIndex).width = 365 * (16)
 				else:
-					# write the rest of the data
 					sheet.write(rowIndex,colIndex, valueArr[rowIndex], wordWrap)
 					sheet.col(colIndex).width = 365 * (16)
 	
-	# Notes on word wrap: There is no default function in xlwt for automatically setting the width of a column
-	# However, according to a StackOverflow answer, the default length of a column is 2962 units, which Excel
-	# recognizes as 8.11 units. Divide 2962 by 8.11 and the answer is somewhere around the 365-367 range. So
-	# for the easiest and most accurate results without output looking hella weird, we can use sheet.col().width
-	# and set it to 365 * 16 to in essence double the size of the column so every header fits to an aesthetic extent	
-
-	# Check if the file exists
 	sovCheck = os.path.isfile(sovFileName[0])
-	if sovCheck == False: # if it doesn't...
-		workbook.save(sovFileName[0]) # save the file
+	if sovCheck == False:
+		workbook.save(sovFileName[0])
 		print "FILE WRITTEN"
-		os.startfile(userhome + sovFileName[0]) # open the file 
+		os.startfile(userhome + sovFileName[0])
 		print "FILE NOW OPEN"
 	else:
 		sovName = findFileName(sovFileName[0])
 		precedingName = '[Pycel_Extracted]_'
 		fileType = getFileExtension(sovFileName[0])
-		newFileName = precedingName + sovName + fileType # build a new filename 
+		newFileName = precedingName + sovName + fileType
 		workbook.save(userhome + newFileName)
 		print "FILE WRITTEN"
 		os.startfile(userhome + newFileName)
 		print "FILE NOW OPEN"
-		
-
-#MAIN CONTROLLER FOR THE PROGRAM
-def run():
-	"""
-	Master Controller
-	
-	Contains the following functions:
-		- ask()
-		- findSheetName()
-		- loopAllRows()
-		- identifyHeaderRow()
-		- head_matcher()
-		- sliceSubHeaderData()
-		- combine()
-		- setnwrite()
-
-	Contains the megadict called comparisonDic. This is where all the magic happens and is similar to the main method in C#/Java/etc.
-	
-	"""
-	# clear the terminal screen
-	clear = lambda: os.system('cls')
-	clear()
-
-	fileName = ask()
-	sheet = findSheetName(fileName)
-	data = loopAllRows(sheet)
-
-
-	headerRow = identifyHeaderRow(data,comparisonDic)
-	headerRow = head_matcher(comp_converter(comparisonDic), headerRow, fileName)
-	subHeadData = sliceSubHeaderData(headerRow, sheet)
-	headSubCombined = combine(headerRow,subHeadData)
-	setnwrite(headSubCombined,fileName)
-	print "Original fileName %s" % (fileName)
-
-
-run()
