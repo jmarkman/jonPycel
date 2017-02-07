@@ -1,5 +1,4 @@
-import Tkinter
-import logging
+import Tkinter, os, sys, logging
 from xlrd import open_workbook
 from unidecode import unidecode
 from tkFileDialog import askopenfilename

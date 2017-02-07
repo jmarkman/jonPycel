@@ -1,5 +1,6 @@
 import os, sys, xlwt, logging, subprocess
 from unidecode import unidecode
+import sovinput as input
 
 """
 This program will take a an SOV of a specific template (right now just amrisc)
@@ -18,7 +19,6 @@ The "desktop" variable is hackneyed because os.path.expanduser can take a longer
 http://stackoverflow.com/questions/2953828/accessing-relative-path-in-python
 """
 
-
 def isEmptyRow(row):
 	"""If row is entirely empty 
 
@@ -27,13 +27,10 @@ def isEmptyRow(row):
 	
 	maxLength = len(row)
 	emptyCheck = []
-	# print row
 	for value in row: # for each value in the array "row"
 		if value == '':
 			emptyCheck.append(value)
-	# print maxLength, len(emptyCheck)
 	if len(emptyCheck) == maxLength:
-		# print "Whole row empty"
 		return True
 
 def sliceSubHeaderData(headerRowDict, sheet):
@@ -47,7 +44,7 @@ def sliceSubHeaderData(headerRowDict, sheet):
 	"""
 
 	dataRowStartNumber=headerRowDict.keys()[0]+1
-	allData=loopAllRows(sheet)
+	allData = input.loopAllRows(sheet)
 	subHeadData={}
 	for key in allData:
 		isEmp=False
@@ -68,7 +65,7 @@ def combine(headerRowDict,subHeaderData):
 	Returns: combined dictionary in format like above^
 	"""
 
-	headSubCombined=headerRowDict.copy()
+	headSubCombined = headerRowDict.copy()
 	headSubCombined.update(subHeaderData)
 	return headSubCombined
 
@@ -104,9 +101,13 @@ def comp_converter(comparisonDic):
 	"""
 	new={}
 	for key in comparisonDic:
-		val=comparisonDic[key]
-		key=decompress(key)
-		new[key]= val
+		val = comparisonDic[key]
+		key = decompress(key)
+		new[key] = val
+		with open('E:\Work\Pycel\jonPycel\output\comp_converter().txt', 'w') as cc:
+			cc.write("The contents of the dictionary new\n\n")
+			for key, value in new.iteritems():
+				cc.write('{0}: {1}\n'.format(key, value))
 	return new
 
 def decompress(value):
@@ -132,12 +133,6 @@ def head_matcher(compressedDict, headerRow, fileName):
 		- compressedDict is the comparison dictionary
 		- headerRow is the dictionary returned from identifyHeaderRow
 		- fileName is the file we're working with, see ask()
-
-		This function basically takes in the comparison dictionary and the header dictionary generated from identifyHeaderRow and begins the matching process. The function starts by creating a new array called decompressedRow.
-
-		For each header item in headerRow, using an itervalues().next() to go through the dictionary, use the decompress function to sanitize each item. Then, if that header item exists in the comparison dictionary that was run through comp_converter(), add that header to the decompressedRow array. Otherwise, add a distinguishing label to decompressedRow to mark that the header wasn't around.
-
-		Finally, return headerRow
 	'''
 	decompressedRow=[]
 	# file=open('unmatches.txt','a+')
@@ -146,16 +141,7 @@ def head_matcher(compressedDict, headerRow, fileName):
 		if header in compressedDict:
 			decompressedRow.append(compressedDict[header])
 		else:
-			# print ("Not matched %s" %header)
-			# file.write (str(fileName[0]))
-			# file.write("\n"+header+ "\n")
 			decompressedRow.append("XX"+header)
-	# print headerRow
-	# for key in headerRow:
-		# headerRow[key]=decompressedRow
-	with open('E:\Work\Pycel\pycel2\output\headerRow_after.txt', 'w') as decompRow:
-		for header in decompressedRow:
-			decompRow.write('{0}'.format(header) + ' ')
 	return headerRow
 
 
@@ -164,17 +150,14 @@ def adjustments(final):
 	MASTER CALLER FOR ADJUSTMENETS
 	Adjusts the data
 	"""
-
-	# for key, value in final.iteritems():
-	# 	print key,value
 	print final['Physical Building #']
 	print final['Single Physical Building #'] 
 	print final['Single Physical Building #'] ==[]
 
 	locNumFix(final,'Loc #')
 
-	if final['Physical Building #']==[] or isColEmpty(final['Physical Building #'])==True:physicalBuildingNum(final, 'Physical Building #')
-	if final['Single Physical Building #']==[] or isColEmpty(final['Single Physical Building #'])==True:physicalBuildingNum(final, "Single Physical Building #")
+	if final['Physical Building #']==[] or isColEmpty(final['Physical Building #'])==True: physicalBuildingNum(final, 'Physical Building #')
+	if final['Single Physical Building #']==[] or isColEmpty(final['Single Physical Building #'])==True: physicalBuildingNum(final, "Single Physical Building #")
 	
 	street1Fix(final, "Street 1")
 
@@ -214,33 +197,27 @@ def sprinkExtent(final):
 	In amrisc, Percent Sprinklered takes anything but dan wants it in  100%, >50%, <=50%, how to manipulate thresholds for non amrisc?
 	"""
 
-	sprinkExtent=final['Sprinkler Extent'][0]
+	sprinkExtent = final['Sprinkler Extent'][0]
 	for itemIndex in range(len(sprinkExtent)):
-		if sprinkExtent[itemIndex]==0.0:
-			sprinkExtent[itemIndex]="None"
+		if sprinkExtent[itemIndex] == 0.0:
+			sprinkExtent[itemIndex] = "None"
 
 def street1Fix(final, street1):
-	"""strips off the number from the street if it is there
+	#strips off the number from the street if it is there
 
-	FIGURE OUT HOW TO DO STREET ABBREVIATIONS SWITCHES"""
-	street1=final[street1][0]
+	#FIGURE OUT HOW TO DO STREET ABBREVIATIONS SWITCHES
+	street1 = final[street1][0]
 	print street1
 	for index in range(len(street1)):
-		space=street1[index].find(' ')
-		posNumber=street1[index][:space]
+		space = street1[index].find(' ')
+		posNumber = street1[index][:space]
 		try:
-			# there is a number
 			posNumber=posNumber.replace('-','')
-			print "i am the possible number %s" %(posNumber)
-			# if this fails it will catch
-			# int(posNumber)
-			# print street1[index][space:].strip()
+			print "i am the possible number %s" % (posNumber)
 			street1[index]=street1[index][space:].strip()
-			# final[street1[index]]=final[street1[index]][space:]
 		except:
-			# no number there
 			pass
-	street1[0]="Street 1"
+	street1[0] = "Street 1"
 
 
 def physicalBuildingNum(final, caption):
@@ -252,27 +229,36 @@ def physicalBuildingNum(final, caption):
 	print 'PHYSICAL BULDING NUMBER IS RUNNING '
 	print caption
 	try:
-		streetArr=final["Street 1"][0][:]
+		streetArr = final["Street 1"][0][:]
 		streetArr.pop(0)
-		numTracker=[caption]
+		numTracker = [caption]
 		for val in streetArr:
 			if len(val)>0:
-				space=val.find(" ")
-				dash=val.find("-")
-				if dash!=-1:
-					num=val[:dash]
+				space = val.find(" ")
+				dash = val.find("-")
+				if dash > 0:
+					holder = val[:space]
+					num1 = holder[:dash]
+					num2 = holder[dash+1:]
 				else:
-					num=val[:space]
+					num = val[:space]
 				print "the numval %s" %(num)
 				try:
-					int(num)
-					numTracker.append(str(num))
+					if caption == 'Single Physical Building #' and dash != -1: 
+						int(num2)
+						numTracker.append(str(num2))
+					elif caption == 'Single Physical Building #':
+						int(num)
+						numTracker.append(str(num))
+					else:
+						int(num1)
+						numTracker.append(str(num1))
 				except ValueError:
 					pass
-		if caption=='Single Physical Building #':
-			final[caption]=final['Physical Building #'][:]
-		else:
-			final[caption]=[numTracker]
+		# if caption == 'Single Physical Building #':
+		# 	final[caption] = final['Physical Building #'][:]
+		# else:
+			final[caption] = [numTracker]
 		print final[caption]
 	except:
 		pass
@@ -280,11 +266,11 @@ def physicalBuildingNum(final, caption):
 def populationCounter(final, caption):
 	"""returns the number of non empty rows filled in the given column"""
 	print "POPULATION COUNTER RUNNING"
-	column=final[caption][0]
-	nonEmptyCount=0
+	column = final[caption][0]
+	nonEmptyCount = 0
 	for item in column:
-		if item!='':
-			nonEmptyCount+=1
+		if item != '':
+			nonEmptyCount += 1
 	return nonEmptyCount
 
 def locNumFix(final, headerName):
@@ -384,13 +370,16 @@ def setnwrite (headSubCombined, fileName):
 	for key in columnDict:
 		if amrisc[key] in work:
 			final[amrisc[key]].append(columnDict[key])
-
+	with open('E:\Work\Pycel\jonPycel\output\dictFinal.txt', 'w') as fnl:
+		fnl.write("The contents of the dictionary final\n\n")
+		for key, value in final.iteritems():
+			fnl.write('{0}: {1}\n'.format(key, value))
 	final = adjustments(final)
 
 	writer(final, work, workHeaderRow, amrisc, fileName)
 
 
-def writer(final, workDict, workHeaderRow, amrisc, sovFileName):
+def writer(final, workDict, workHeaderRow, template, sovFileName):
 	"""Does the writing"""
 	workbook = xlwt.Workbook() 
 
@@ -408,7 +397,7 @@ def writer(final, workDict, workHeaderRow, amrisc, sovFileName):
 		else:
 			valueArr = values[0]
 			for rowIndex in range(len(valueArr)):
-				if valueArr[rowIndex] in amrisc:
+				if valueArr[rowIndex] in template:
 					sheet.write(rowIndex,colIndex, key, wordWrap)
 					sheet.col(colIndex).width = 365 * (16)
 				else:

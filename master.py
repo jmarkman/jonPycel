@@ -1,6 +1,6 @@
 import sovinput as input
 import sovmanip as modify
-import sovwrite as write
+import os
 
 comparisonDic = { 
     'Yr Bldg updated (Mand if >25 yrs)':'Wiring Year',

@@ -1,0 +1,269 @@
+The contents of the dictionary new
+
+code: ClassCodeDesc
+no. of units: # Units
+roof shape: Roof Geometry
+bi/rental income ($): Misc Real Property
+bi w/ee: Business Income
+sprinkler extent: Sprinkler Extent
+name/address: Street 1
+wh at type of construction is the building?   (see yellow second tab for descriptions): Construction Type
+*total tiv: TIV
+ye ar built: Year Built
+clt #: Loc #
+fire alarm type: Fire Alarm Type
+*bldg no.: Bldg #
+street add.: Street 1
+building square footage: Sq Ftg
+*yr. roof covering last repl: Roofing Year
+building description: Building Description
+const: Construction Type
+sf: Sq Ftg
+street address: Street 1
+building square ft.: Sq Ftg
+cnst type: Construction Type
+plumbing updates: Plumbing Year
+location: Loc #
+building num .: Bldg #
+*real property value ($): Building Value
+insureds com plete street address: Street 1
+sq. ft.: Sq Ftg
+protect class: Prot Class
+address:: Street 1
+year roof updated: Roofing Year
+**exterior cladding: Cladding Type
+* bldg no.: Bldg #
+address1: Street 1
+loc. #: Loc #
+building number: Bldg #
+# of sto.: # Stories
+contents value: Business Personal Property
+soft costs: Business Personal Property
+basement: # Basements
+business income & extra expen se: Business Income
+constr *: Construction Type
+sprinklered y or n: Sprinkler Alarm Type
+description: Building Description
+*# of units if apartments or condos: # Units
+street 1: Street 1
+no. of stories: # Stories
+burgler alarm: Burgler Alarm Type
+sprinkler alarm type: Sprinkler Alarm Type
+grosssqfootage: Sq Ftg
+bpp: Business Personal Property
+yr of updates to wiring: Wiring Year
+elev: # Stories
+zip code: Zip
+loc num: Loc #
+* bi/rental income: Business Income
+real property value: Building Value/
+exterior cladding: Cladding Type
+rents: Business Income
+isoconstcode: Prot Class
+building address: Street 1
+bld#: Bldg #
+insured contace zipcode: Zip
+street name & number: Street 1
+wiring updates: Wiring Year
+yr built: Year Built
+street: Street 1
+# of units: # Units
+year: Year Built
+*zip: Zip
+misc real property: Misc Real Property
+bi limit: Business Income
+bldg sq ft: Sq Ftg
+bpp w/stock: Business Personal Property
+total: TIV
+prot. class: Prot Class
+predominant exterior wall / cladding (use weakest cladding comprising at least 25% of wall area): Cladding Type
+business income/ lor: Business Income
+fire alarms (operational): Fire Alarm Type
+totals: TIV
+bldg.: Bldg #
+year electric updated: Wiring Year
+state: State
+protections: Prot Class
+unit #: # Units
+building no.: Bldg #
+burgler alarm type: Burgler Alarm Type
+insured contact address: Street 1
+frame-foundation connection: Frame-Foundation Connection
+yr blt: Year Built
+percent sprinklered: Sprinkler Extent
+em cladding type: Cladding Type
+personal property limit: Business Personal Property
+pers prop: Business Personal Property
+loc: Loc #
+*street address: Street 1
+protection class: Prot Class
+yr of u pdates to roofing: Roofing Year
+bi: Business Income
+# basements: # Basements
+Other Value $ (outdoor prop & Eqpt must be sch'd): Business Income
+# of bldgs: # Units
+roofing year: Roofing Year
+const code (iso)*: Construction Type
+building frame to foundation connection: Frame-Foundation Connection
+physical address: Street 1
+Location Street Address: : Street 1
+miscelaneous real property: Misc Real Property
+*# of stories: # Stories
+business income/ rents/ inc extra expense: Business Income
+sqfootage: Sq Ftg
+*square footage: Sq Ftg
+personal property value ($): Business Personal Property
+roof covering: Roof Covering
+location(s): Street 1
+total above ground sqft: Sq Ftg
+ocupancy: Building Description
+loc no.: Loc #
+total sf: Sq Ftg
+*state code: State
+property type: Building Description
+occ: Building Description
+*state: State
+total insurable values: TIV
+construction description: Construction Type
+sprinkle r: Sprinkler Alarm Type
+# stories: # Stories
+const floors: Construction Type
+bi/ee: Business Income
+constr: Construction Type
+bld #: Bldg #
+building replacement cost: Building Value
+county: County
+rating basis: Building Description
+electrical update yr: Wiring Year
+construction description (provide further details on construction features): Construction Type
+occupanc y / building type: Building Description
+roof geometry: Roof Geometry
+insured contact state: State
+sq ftg: Sq Ftg
+location number: Loc #
+city: City
+zip: Zip
+area: Sq Ftg
+business income: Business Income
+heatingyear: Heating Year
+loc number: Loc #
+construction description (ie frame, jm, nc, mnc, fire resistive, modified fire resistive, etc): Construction Type
+y r. built: Year Built
+occupancy: Building Description
+# st: # Stories
+roof anchor: Roof Anchor
+st.: Street 1
+ppc code: Prot Class
+prot class: Prot Class
+postal code: Zip
+*state abbrev.: State
+square ft.: Sq Ftg
+roof wall attachment: Roof Sheathing Attachment
+bldg value: Building Value
+% sprkld: Sprinkler Extent
+Yr Bldg updated (Mand if >25 yrs): Wiring Year
+yr of updates to plumbing: Plumbing Year
+fire alarm: Fire Alarm Type
+Loc  #: Loc #
+classcodedesc: ClassCodeDesc
+*city: City
+pl umbing update yr: Plumbing Year
+iso prot class: Prot Class
+*real property va lue ($): Building Value
+sq footage: Sq Ftg
+location address: Street 1
+address including street #: Street 1
+plumbing year: Plumbing Year
+professional s qft: Sq Ftg
+*roof anchorage (if iso 1 or 2 or any other with wood fr amed roof): Roof Anchor
+total building squ are footage: Sq Ftg
+cladding type: Cladding Type
+location #: Loc #
+pc: Prot Class
+roof: Roofing Year
+**shape of roof: Roof Geometry 
+loss of business income: Business Income
+loss of bus iness income/rents @ 100% annual: Business Income
+loc id: Loc #
+*basement: # Basements
+extshell: Construction Type
+wiring year: Wiring Year
+yearelectricalupdated(yyyy): Wiring Year
+*occupancy description: Building Description
+bldg: Bldg #
+roof update yr: Roofing Year
+address: Street 1
+annual rents: Business Income
+rents value: Business Income
+state code: State
+rents 100% (12 months): Business Income
+**type of roof covering: Roof Geometry
+yearbuilt(yyyy): Year Built
+personal prope rty: Business Personal Property
+# bldg's: # Units
+hard cost: Building Value
+state/province: State
+constru-ctiondescription: Construction Type
+yea r roof covering last fully replaced: Roofing Year
+sprinkler system : Sprinkler Alarm Type
+year plumbing updated: Plumbing Year
+building limit: Building Value
+stories: # Stories
+sq. foot: Sq Ftg
+location city: City
+contents: Business Personal Property
+all other personal property: Business Personal Property
+yearplumbingupdated(yyyy): Plumbing Years
+*# of bldgs: # Units
+*county: County
+const.: Con struction Type
+*occupancy type (ie apartments, offices, warehouses): Building Descri ption
+building @ 100%: Building Value
+construction type: Construction Type
+wiring: Wiring Year
+zipcode: Zip
+type of ro of covering: Roof Covering
+yearroofupdated(yyyy): Roofing Year
+(tiv) total insurable value: TIV
+loc #: Loc #
+bldg limit: Building Value
+# of floors: # Stories
+tota l values: TIV
+storiesaboveground: # Stories
+bus income: Business Income
+type of construction: Construction type
+insured contact city: City
+# units: # Units
+square feet : Sq Ftg
+sprlk: Sprinkler Alarm Type
+*roof anchorage: Roof Anchor
+roof updates: Roofin g Year
+sqft: Sq Ftg
+square footage: Sq Ftg
+business personal property: Business Personal Property
+year built: Year Built
+constructionclassdescription(isoseeattached): Construction Type
+totalsqft: Sq Ftg
+un its: # Units
+shape of roof: Roof Geometry
+number of stories: # Stories
+*property type: Building Description
+yearhvacupdated(yyyy): Heating Year
+building: Building Value
+const type: Construction Type
+bldggsqft: Sq Ftg
+sprinklered (y/n): Sprinkler Alarm Type
+* building value: Building Value
+bldgname: Street 1
+bpp (cont ents)     *this is not included in the buildings coverage.: Business Personal Property
+bldg. num.: Bldg #
+st: State
+*orig year built: Year Built
+construction: Construction Type
+aplocnumbe r: Loc #
+bi/ee/rents: Business Income
+plumbing: Plumbing Year
+* contents value: Business Personal Property
+sq ft: Sq Ftg
+tiv: TIV
+building value: Building Value
