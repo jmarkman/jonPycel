@@ -234,8 +234,6 @@ def physicalBuildingNum(final, caption):
 				else:
 					num = val[:space]
 				print "the numval %s" %(num)
-				print "the numval %s" %(num1)
-				print "the numval %s" %(num2)
 				try:
 					if caption == 'Single Physical Building #' and dash != -1: 
 						int(num2)
@@ -268,6 +266,8 @@ def locNumFix(final, headerName):
 	toWriteCount=populationCounter(final,"State")
 	final[headerName][0]=final[headerName][0][:toWriteCount]
 	
+
+
 def nonePlacer(final, headerName):
 	"""Places None in the entire column 
 	NOTE: to retrieve appropriate length it relies on the assumption that the STATE column is full
@@ -331,9 +331,6 @@ def setnwrite (headSubCombined, fileName):
 
 	workbook = open_workbook(fileName[0])
 	sheet = workbook.sheet_by_index(0)
-	amriscCell1 = sheet.cell_value(0,0)
-	amriscCell2 = sheet.cell_value(0,1)
-	crcSwettCell = sheet.cell_value(10,0)
 	amriscID = "AmRisc Application / Schedule of Values"
 	crcSwettID = "LOCATION INFORMATION"
 	
@@ -341,108 +338,16 @@ def setnwrite (headSubCombined, fileName):
 
 	final = {key: [] for key in workHeaderRow}
 
-	work={
-		'Loc #':0,
-		'Bldg #':1,
-		'Delete':2,
-		'Physical Building #':3,
-		'Single Physical Building #':4,
-		'Street 1':5,
-		'Street 2':6,
-		'City':7,
-		'State':8,
-		'Zip':9,
-		'County':10,
-		'Validated Zip':11,
-		'Building Value':12,
-		'Business Personal Property':13,
-		'Business Income':14,
-		'Misc Real Property':15,
-		'TIV':16,
-		'# Units':17,
-		'Building Description':18,
-		'ClassCodeDesc':19,
-		'Construction Type':20,
-		'Dist. To Fire Hydrant (Feet)':21,
-		'Dist. To Fire Station (Miles)':22,
-		'Prot Class':23,
-		'# Stories':24,
-		'# Basements':25,
-		'Year Built':26,
-		'Sq Ftg':27,
-		'Wiring Year':28,
-		'Plumbing Year':29,
-		'Roofing Year':30,
-		'Heating Year':31,
-		'Fire Alarm Type':32,
-		'Burglar Alarm Type':33,
-		'Sprinkler Alarm Type':34,
-		'Sprinkler Wet/Dry':35,
-		'Sprinkler Extent':36,
-		'Roof Covering':37,
-		'Roof Geometry':38,
-		'Roof Anchor':39,
-		'Cladding Type':40,
-		'Roof Sheathing Attachment':41,
-		'Frame-Foundation Connection':42,
-		'Residential Appurtenant Structures':43
-		}
+	work={'Loc #':0,'Bldg #':1,'Delete':2,'Physical Building #':3,'Single Physical Building #':4,'Street 1':5,'Street 2':6,'City':7,'State':8,'Zip':9,'County':10,'Validated Zip':11,'Building Value':12,'Business Personal Property':13,'Business Income':14,'Misc Real Property':15,'TIV':16,'# Units':17,'Building Description':18,'ClassCodeDesc':19,'Construction Type':20,'Dist. To Fire Hydrant (Feet)':21,'Dist. To Fire Station (Miles)':22,'Prot Class':23,'# Stories':24,'# Basements':25,'Year Built':26,'Sq Ftg':27,'Wiring Year':28,'Plumbing Year':29,'Roofing Year':30,'Heating Year':31,'Fire Alarm Type':32,'Burglar Alarm Type':33,'Sprinkler Alarm Type':34,'Sprinkler Wet/Dry':35,'Sprinkler Extent':36,'Roof Covering':37,'Roof Geometry':38,'Roof Anchor':39,'Cladding Type':40,'Roof Sheathing Attachment':41,'Frame-Foundation Connection':42,'Residential Appurtenant Structures':43}
 
-	amrisc={
-		"Percent Sprinklered":"Sprinkler Extent",
-		"Sprinklered (Y/N)":"Sprinkler Wet/Dry",
-		"*Year Roof covering last fully replaced":"Roofing Year",
-		"* Bldg No.":"Loc #",
-		"*Orig Year Built":"Year Built",
-		"*Square Footage":"Sq Ftg",
-		"*# of Stories":"# Stories",
-		"AddressNum":"Physical Building #",
-		"*Street Address":"Street 1", 
-		"*City":"City", 
-		"*State Code":"State", 
-		"*Zip":"Zip", 
-		"County":"County", 
-		"*Real Property Value ($)":"Building Value", 
-		"Personal Property Value ($)":"Business Personal Property", 
-		"personal property value  ($)":"Business Personal Property", 
-		"Personal Property Value ($) ":"Business Personal Property",
-		"Other Value $ (outdoor prop & Eqpt must be sch'd)":"Misc Real Property",
-		"BI/Rental Income ($)":"Business Income",
-		"*Total TIV":"TIV", 
-		"*Occupancy":"Building Description", 
-		"Construction Description ":"Construction Type", 
-		"Construction Description (provide further details on construction features)":"Construction Type",
-		"ISO Prot Class":"Prot Class",
-		"*# of Units":"# Units"
-		}
+	amrisc={"Percent Sprinklered":"Sprinkler Extent","Sprinklered (Y/N)":"Sprinkler Wet/Dry","*Year Roof covering last fully replaced":"Roofing Year", "* Bldg No.":"Loc #","*Orig Year Built":"Year Built","*Square Footage":"Sq Ftg","*# of Stories":"# Stories","AddressNum":"Physical Building #", "*Street Address":"Street 1", "*City":"City", "*State Code":"State", "*Zip":"Zip", "County":"County", "*Real Property Value ($)":"Building Value", "Personal Property Value ($)":"Business Personal Property", "personal property value  ($)":"Business Personal Property", "Personal Property Value ($) ":"Business Personal Property", "Other Value $ (outdoor prop & Eqpt must be sch'd)":"Misc Real Property","BI/Rental Income ($)":"Business Income", "*Total TIV":"TIV", "*Occupancy":"Building Description", "Construction Description ":"Construction Type", "Construction Description (provide further details on construction features)":"Construction Type","ISO Prot Class":"Prot Class","*# of Units":"# Units"}
 
-	crcSwett = {
-		"Loc  #":"Loc #",
-		"Location Street Address:":"Street 1",
-		"City":"City",
-		"State":"State",
-		"Zip Code":"Zip",
-		"Building Value":"Building Value",
-		"Content":"Business Personal Property",
-		"BI w/ EE":"Business Income",
-		"Total TIV":"TIV",
-		"# Apt  Units":"# Units",
-		"Building Occupancy":"Building Description",
-		"Construction":"Construction Type",
-		"# of Stories":"# Stories",
-		"Yr Built Gut/Reh":"Year Built",
-		"Total Building  Area":"Sq Ftg",
-		"Plumbing":"Plumbing Year",
-		"Heating":"Heating Year",
-		"Electrical":"Wiring Year",
-		"Roof":"Roofing Year",
-		"Sprinkler %":"Sprinkler Extent"
-		}
+	crcSwett = {"Loc  #":"Loc #","Location Street Address:":"Street 1","City":"City","State":"State","Zip Code":"Zip","Building Value":"Building Value","Content":"Business Personal Property","BI w/ EE":"Business Income","Total TIV":"TIV","# Apt  Units":"# Units","Building Occupancy":"Building Description","Construction":"Construction Type","# of Stories":"# Stories","Yr Built Gut/Reh":"Year Built","Total Building  Area":"Sq Ftg","Plumbing":"Plumbing Year","Heating":"Heating Year","Electrical":"Wiring Year","Roof":"Roofing Year","Sprinkler %":"Sprinkler Extent"}
 	# AMRISC TODO: workstation columns that don't have a 1:1 with an amrisc won't autoflip, fill these with whatever is needed (most of the last columns)
 
 	# ADD FILE TEMPLATES HERE, TODO: FIND A WAY TO SELECT TEMPLATES OR AUTOFIND THEM
 	
-	if amriscCell1.find(amriscID) != -1 or amriscCell2.find(amriscID) != -1:
+	if sheet.cell(0,0).find(amriscID) != -1 or sheet.cell(0,1).find(amriscID) != -1:
 		minimum= min(headSubCombined, key=headSubCombined.get)-1
 		headerRow= headSubCombined[minimum]
 		sov_index={}
@@ -462,7 +367,7 @@ def setnwrite (headSubCombined, fileName):
 				final[amrisc[key]].append(columnDict[key])
 		final = adjustments(final)
 		writer(final, work, workHeaderRow, amrisc, fileName)
-	elif crcSwettCell.find(crcSwettID) != -1:
+	elif sheet.cell(10,0).find(crcSwettID) != -1:
 		minimum= min(headSubCombined, key=headSubCombined.get)-1
 		headerRow= headSubCombined[minimum]
 		sov_index={}

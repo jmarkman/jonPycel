@@ -18,7 +18,6 @@ building square footage: Sq Ftg
 *yr. roof covering last repl: Roofing Year
 building description: Building Description
 const: Construction Type
-sf: Sq Ftg
 street address: Street 1
 building square ft.: Sq Ftg
 cnst type: Construction Type
@@ -58,6 +57,7 @@ loc num: Loc #
 * bi/rental income: Business Income
 real property value: Building Value/
 exterior cladding: Cladding Type
+cladding type: Cladding Type
 rents: Business Income
 isoconstcode: Prot Class
 building address: Street 1
@@ -100,18 +100,18 @@ protection class: Prot Class
 yr of u pdates to roofing: Roofing Year
 bi: Business Income
 # basements: # Basements
-Other Value $ (outdoor prop & Eqpt must be sch'd): Business Income
+bldg: Bldg #
 # of bldgs: # Units
 roofing year: Roofing Year
 const code (iso)*: Construction Type
 building frame to foundation connection: Frame-Foundation Connection
 physical address: Street 1
-Location Street Address: : Street 1
 miscelaneous real property: Misc Real Property
+square feet: Sq Ftg
 *# of stories: # Stories
 business income/ rents/ inc extra expense: Business Income
 sqfootage: Sq Ftg
-*square footage: Sq Ftg
+other value $ (outdoor prop & eqpt must be sch'd): Business Income
 personal property value ($): Business Personal Property
 roof covering: Roof Covering
 location(s): Street 1
@@ -128,6 +128,7 @@ construction description: Construction Type
 sprinkle r: Sprinkler Alarm Type
 # stories: # Stories
 const floors: Construction Type
+*orig year built: Year Built
 bi/ee: Business Income
 constr: Construction Type
 bld #: Bldg #
@@ -161,10 +162,10 @@ square ft.: Sq Ftg
 roof wall attachment: Roof Sheathing Attachment
 bldg value: Building Value
 % sprkld: Sprinkler Extent
-Yr Bldg updated (Mand if >25 yrs): Wiring Year
+*# of bldgs: # Units
 yr of updates to plumbing: Plumbing Year
 fire alarm: Fire Alarm Type
-Loc  #: Loc #
+construction: Construction Type
 classcodedesc: ClassCodeDesc
 *city: City
 pl umbing update yr: Plumbing Year
@@ -173,24 +174,24 @@ iso prot class: Prot Class
 sq footage: Sq Ftg
 location address: Street 1
 address including street #: Street 1
+loc id: Loc #
 plumbing year: Plumbing Year
 professional s qft: Sq Ftg
 *roof anchorage (if iso 1 or 2 or any other with wood fr amed roof): Roof Anchor
 total building squ are footage: Sq Ftg
-cladding type: Cladding Type
+yr bldg updated (mand if >25 yrs): Wiring Year
 location #: Loc #
 pc: Prot Class
 roof: Roofing Year
 **shape of roof: Roof Geometry 
 loss of business income: Business Income
 loss of bus iness income/rents @ 100% annual: Business Income
-loc id: Loc #
+loc  #: Loc #
 *basement: # Basements
 extshell: Construction Type
 wiring year: Wiring Year
 yearelectricalupdated(yyyy): Wiring Year
 *occupancy description: Building Description
-bldg: Bldg #
 roof update yr: Roofing Year
 address: Street 1
 annual rents: Business Income
@@ -202,10 +203,11 @@ yearbuilt(yyyy): Year Built
 personal prope rty: Business Personal Property
 # bldg's: # Units
 hard cost: Building Value
+*square footage: Sq Ftg
 state/province: State
 constru-ctiondescription: Construction Type
 yea r roof covering last fully replaced: Roofing Year
-sprinkler system : Sprinkler Alarm Type
+construction type: Construction Type
 year plumbing updated: Plumbing Year
 building limit: Building Value
 stories: # Stories
@@ -214,12 +216,11 @@ location city: City
 contents: Business Personal Property
 all other personal property: Business Personal Property
 yearplumbingupdated(yyyy): Plumbing Years
-*# of bldgs: # Units
 *county: County
 const.: Con struction Type
 *occupancy type (ie apartments, offices, warehouses): Building Descri ption
 building @ 100%: Building Value
-construction type: Construction Type
+tiv: TIV
 wiring: Wiring Year
 zipcode: Zip
 type of ro of covering: Roof Covering
@@ -231,10 +232,9 @@ bldg limit: Building Value
 tota l values: TIV
 storiesaboveground: # Stories
 bus income: Business Income
-type of construction: Construction type
+type of construction: Construction Type
 insured contact city: City
 # units: # Units
-square feet : Sq Ftg
 sprlk: Sprinkler Alarm Type
 *roof anchorage: Roof Anchor
 roof updates: Roofin g Year
@@ -247,23 +247,23 @@ totalsqft: Sq Ftg
 un its: # Units
 shape of roof: Roof Geometry
 number of stories: # Stories
+* building value: Building Value
 *property type: Building Description
 yearhvacupdated(yyyy): Heating Year
 building: Building Value
 const type: Construction Type
 bldggsqft: Sq Ftg
 sprinklered (y/n): Sprinkler Alarm Type
-* building value: Building Value
+sprinkler system: Sprinkler Alarm Type
 bldgname: Street 1
 bpp (cont ents)     *this is not included in the buildings coverage.: Business Personal Property
 bldg. num.: Bldg #
 st: State
-*orig year built: Year Built
-construction: Construction Type
+location street address:: Street 1
 aplocnumbe r: Loc #
 bi/ee/rents: Business Income
 plumbing: Plumbing Year
 * contents value: Business Personal Property
 sq ft: Sq Ftg
-tiv: TIV
+sf: Sq Ftg
 building value: Building Value
