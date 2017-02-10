@@ -73,6 +73,11 @@ def loopAllRows(sheet):
 				rowPureData.append(item.value)
 			totalPureData[i] = rowPureData
 		i += 1
+	# Debug
+	# with open('E:\Work\Pycel\jonPycel\output\getAllRows.txt', 'w') as allRows:
+	# 	allRows.write("The contents of the dictionary final\n\n")
+	# 	for key, value in totalPureData.iteritems():
+	# 		allRows.write('{0}: {1}\n'.format(key, value))
 	return totalPureData
 
 def identifyHeaderRow(numValsDict,comparisonDic):

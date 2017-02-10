@@ -105,10 +105,10 @@ def comp_converter(comparisonDic):
 		val = comparisonDic[key]
 		key = decompress(key)
 		new[key] = val
-		with open('E:\Work\Pycel\jonPycel\output\comp_converter().txt', 'w') as cc:
-			cc.write("The contents of the dictionary new\n\n")
-			for key, value in new.iteritems():
-				cc.write('{0}: {1}\n'.format(key, value))
+		# with open('E:\Work\Pycel\jonPycel\output\comp_converter().txt', 'w') as cc:
+		# 	cc.write("The contents of the dictionary new\n\n")
+		# 	for key, value in new.iteritems():
+		# 		cc.write('{0}: {1}\n'.format(key, value))
 	return new
 
 def decompress(value):
@@ -161,13 +161,14 @@ def adjustments(final):
 
 	if final["Fire Alarm Type"]==[] or isColEmpty(final['Fire Alarm Type'])==True: nonePlacer(final, "Fire Alarm Type")
 	if final["Burglar Alarm Type"]==[] or isColEmpty(final['Burglar Alarm Type'])==True: nonePlacer(final, "Burglar Alarm Type")
-	if final["Sprinkler Alarm Type"]==[] or isColEmpty(final['Sprinkler Alarm Type'])==True: nonePlacer(final, "Sprinkler Alarm Type")
+	if final["Sprinkler Alarm Type"]==[] or isColEmpty(final['Sprinkler Alarm Type'])==True: sprinkAlarmType(final)
 	# sprinkWetDry(final)
 	sprinkExtent(final)
 	populationCounter(final, 'State')
 
 	return final
 
+# sprinkWetDry() is most likely a deprecated function, do not uncomment until further notice
 '''
 def sprinkWetDry(final):
 	"""In amrisc, Column sprinkered Wet/Dry only accepts a Dry, Wet, None... this correct it to ____ and None
@@ -189,22 +190,50 @@ def sprinkExtent(final):
 	"""
 
 	sprinkExtent = final['Sprinkler Extent'][0]
-	for itemIndex in range(len(sprinkExtent)):
-		if sprinkExtent[itemIndex] == 0.0:
-			sprinkExtent[itemIndex] = "None"
+	locationNum = final['Loc #'][0]
+	for itemIndex in range(1, len(sprinkExtent)):
+		try:
+			if sprinkExtent[itemIndex] == 0.0:
+				sprinkExtent[itemIndex] = "None"
+			elif sprinkExtent[itemIndex] == 0.0 and locationNum[itemIndex] == "":
+				sprinkExtent[itemIndex] = ""
+			elif sprinkExtent[itemIndex] == 0.5:
+				sprinkExtent[itemIndex] = "50%"
+			elif sprinkExtent[itemIndex] == 1.0:
+				sprinkExtent[itemIndex] = "100%"
+			else:
+				sprinkExtent[itemIndex] = ""
+		except IndexError:
+			nonePlacer(final, "Sprinkler Extent")
+
+
+def sprinkAlarmType(final):
+	sprinkYN = final['Sprinkler Wet/Dry'][0]
+	sprnkList = ['Sprinkler Alarm Type']
+	sprnkTypeList = final['Sprinkler Alarm Type'].append(sprnkList)
+	sprinkType = final['Sprinkler Alarm Type'][0]
+	for cond in range(1, len(sprinkYN)):
+		try:
+			if sprinkYN[cond] == 'Y' or sprinkYN[cond] == 'y':
+				sprinkYN[cond] = "Wet"
+				sprinkType.append("Local")
+			elif sprinkYN[cond] == 'N' or sprinkYN[cond] == 'n':
+				sprinkYN[cond] = "None"
+				sprinkType.append("None")		
+			else:
+				sprinkYN[cond] = ""
+		except IndexError:
+			nonePlacer(final, "Sprinkler Alarm Type")
 
 def street1Fix(final, street1):
 	#strips off the number from the street if it is there
 
-	#FIGURE OUT HOW TO DO STREET ABBREVIATIONS SWITCHES
 	street1 = final[street1][0]
-	print street1
 	for index in range(len(street1)):
 		space = street1[index].find(' ')
 		posNumber = street1[index][:space]
 		try:
-			posNumber=posNumber.replace('-','')
-			print "i am the possible number %s" % (posNumber)
+			posNumber=posNumber.replace('-',' ')
 			street1[index]=street1[index][space:].strip()
 		except:
 			pass
@@ -212,13 +241,16 @@ def street1Fix(final, street1):
 
 
 def physicalBuildingNum(final, caption):
-	"""Identifies the number associated with the street1 and populates a colum with this number
-	 if this column is Single Physical Building Number, it will copy Physical Building #
+	"""
+	Takes the street numbers from the address contained within (for AmRisc) "*Street Address", 
+	splits them, and based on the provided caption, places them in a list which is used to
+	populate the column that corresponds with the caption.
 	
-	 TODO test this more"""
-
-	print 'PHYSICAL BULDING NUMBER IS RUNNING '
-	print caption
+	Param "final": Dictionary
+	Param "caption": String
+	"""
+	# print 'PHYSICAL BULDING NUMBER IS RUNNING '
+	# print caption
 	try:
 		streetArr = final["Street 1"][0][:]
 		streetArr.pop(0)
@@ -231,11 +263,11 @@ def physicalBuildingNum(final, caption):
 					holder = val[:space]
 					num1 = holder[:dash]
 					num2 = holder[dash+1:]
+					#print "the numval %s" %(num1)
+					#print "the numval %s" %(num2)
 				else:
 					num = val[:space]
-				print "the numval %s" %(num)
-				print "the numval %s" %(num1)
-				print "the numval %s" %(num2)
+					#print "the numval %s" %(num)
 				try:
 					if caption == 'Single Physical Building #' and dash != -1: 
 						int(num2)
@@ -249,12 +281,22 @@ def physicalBuildingNum(final, caption):
 				except ValueError:
 					pass
 			final[caption] = [numTracker]
-		print final[caption]
 	except:
 		pass
-		
+
+# def populateBasements(final):
+"""
+Add entry to dictionary? "Basement":"# Basements"
+"""
+
+
 def populationCounter(final, caption):
-	"""returns the number of non empty rows filled in the given column"""
+	"""
+	Returns the number of non empty rows in the column specified by caption
+	
+	Param "final": Dictionary
+	Param "caption": String
+	"""
 	print "POPULATION COUNTER RUNNING"
 	column = final[caption][0]
 	nonEmptyCount = 0
@@ -307,17 +349,17 @@ def isColEmpty(columnVals):
 
 	print "\nExecuting isColEmpty"
 	if columnVals==[]: 
-		print "%s is totally empty" %(columnVals)
+		# print "%s is totally empty" %(columnVals)
 		return True
 
 	notEmptyCount=0
 	for ArrayOrVal in columnVals:
 		if type(ArrayOrVal)==list:
-			print "nested array: %s" %(ArrayOrVal)
+			# print "nested array: %s" %(ArrayOrVal)
 			for value in ArrayOrVal:
 				value=str(value)
 			 	if value!="":
-			 		print "the Value: %s" %(value)
+			 		# print "the Value: %s" %(value)
 			 		notEmptyCount+=1		
 	if notEmptyCount<=1:
 		return True
@@ -438,9 +480,7 @@ def setnwrite (headSubCombined, fileName):
 		"Roof":"Roofing Year",
 		"Sprinkler %":"Sprinkler Extent"
 		}
-	# AMRISC TODO: workstation columns that don't have a 1:1 with an amrisc won't autoflip, fill these with whatever is needed (most of the last columns)
 
-	# ADD FILE TEMPLATES HERE, TODO: FIND A WAY TO SELECT TEMPLATES OR AUTOFIND THEM
 	
 	if amriscCell1.find(amriscID) != -1 or amriscCell2.find(amriscID) != -1:
 		minimum= min(headSubCombined, key=headSubCombined.get)-1
@@ -461,6 +501,13 @@ def setnwrite (headSubCombined, fileName):
 			if amrisc[key] in work:
 				final[amrisc[key]].append(columnDict[key])
 		final = adjustments(final)
+
+		#Debug
+		# with open('E:\Work\Pycel\jonPycel\output\sheetFinal.txt', 'w') as stfnl:
+		# 	stfnl.write("The contents of the dictionary final\n\n")
+		# 	for key, value in final.iteritems():
+		# 		stfnl.write('{0}: {1}\n'.format(key, value))
+
 		writer(final, work, workHeaderRow, amrisc, fileName)
 	elif crcSwettCell.find(crcSwettID) != -1:
 		minimum= min(headSubCombined, key=headSubCombined.get)-1
@@ -485,7 +532,8 @@ def setnwrite (headSubCombined, fileName):
 
 def writer(final, workDict, workHeaderRow, template, sovFileName):
 	"""Does the writing"""
-	workbook = xlwt.Workbook() 
+	workbook = xlwt.Workbook()
+	colWidth = 256 * 20
 
 	# HOW TO DO A CELL OVERWRITE AS A LAST RESORT IF NEEDED
 	# sheet = workbook.add_sheet("WKFC_Sheet1", cell_overwrite_ok=True)
@@ -496,18 +544,18 @@ def writer(final, workDict, workHeaderRow, template, sovFileName):
 		wordWrap = xlwt.easyxf('align: wrap on, horiz center')
 
 		if values==[]:
-			sheet.write(0,colIndex,key, wordWrap)
+			sheet.write(0, colIndex, key)
 			sheet.col(colIndex).width = 365 * (16)
 		else:
 			valueArr = values[0]
 			for rowIndex in range(len(valueArr)):
 				if valueArr[rowIndex] in template:
-					sheet.write(rowIndex,colIndex, key, wordWrap)
+					sheet.write(rowIndex, colIndex, key, wordWrap)
 					sheet.col(colIndex).width = 365 * (16)
 				else:
-					sheet.write(rowIndex,colIndex, valueArr[rowIndex], wordWrap)
+					sheet.write(rowIndex, colIndex, valueArr[rowIndex], wordWrap)
 					sheet.col(colIndex).width = 365 * (16)
-		
+	
 	sovCheck = os.path.isfile(sovFileName[0])
 	if sovCheck == False:
 		workbook.save(sovFileName[0])
