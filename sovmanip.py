@@ -98,17 +98,12 @@ def getFileExtension(file):
 def comp_converter(comparisonDic):
 	"""Removes unwanted characters from dictionary
 	--see decompress
-	
 	"""
 	new={}
 	for key in comparisonDic:
 		val = comparisonDic[key]
 		key = decompress(key)
 		new[key] = val
-		# with open('E:\Work\Pycel\jonPycel\output\comp_converter().txt', 'w') as cc:
-		# 	cc.write("The contents of the dictionary new\n\n")
-		# 	for key, value in new.iteritems():
-		# 		cc.write('{0}: {1}\n'.format(key, value))
 	return new
 
 def decompress(value):
@@ -121,7 +116,6 @@ def decompress(value):
 	value = str(value)
 	return value.lower().strip()
 
-
 def head_matcher(compressedDict, headerRow, fileName):
 	'''
 	Parameters: compressedDict, headerRow, fileName
@@ -130,7 +124,6 @@ def head_matcher(compressedDict, headerRow, fileName):
 		- fileName is the file we're working with, see ask()
 	'''
 	decompressedRow=[]
-	# file=open('unmatches.txt','a+')
 	for header in headerRow.itervalues().next():
 		header=decompress(header)
 		if header in compressedDict:
@@ -147,23 +140,34 @@ def adjustments(final):
 	"""
 	locNumFix(final,'Loc #')
 
-	if final['Physical Building #']==[] or isColEmpty(final['Physical Building #'])==True: physicalBuildingNum(final, 'Physical Building #')
-	if final['Single Physical Building #']==[] or isColEmpty(final['Single Physical Building #'])==True: physicalBuildingNum(final, "Single Physical Building #")
+	if final['Physical Building #'] == [] or isColEmpty(final['Physical Building #']) == True: 
+		physicalBuildingNum(final, 'Physical Building #')
+	if final['Single Physical Building #'] == [] or isColEmpty(final['Single Physical Building #']) == True: 
+		physicalBuildingNum(final, "Single Physical Building #")
 	
 	street1Fix(final, "Street 1")
 
-	if final["State"]==[] or isColEmpty(final['State'])==True: statesConverter(final, "State")
+	if final["State"] == [] or isColEmpty(final['State']) == True: 
+		statesConverter(final, "State")
 
-	if final["Wiring Year"]==[] or isColEmpty(final['Wiring Year'])==True:     wprhY(final, "Wiring Year")
-	if final["Plumbing Year"]==[]or isColEmpty(final['Plumbing Year'])==True:  wprhY(final, 'Plumbing Year')
-	if final["Roofing Year"]==[]or isColEmpty(final['Roofing Year'])==True:    wprhY(final, 'Roofing Year')
-	if final["Heating Year"]==[]or isColEmpty(final['Heating Year'])==True:   wprhY(final, 'Heating Year')
+	if final["Wiring Year"] == [] or isColEmpty(final['Wiring Year']) == True:
+		wprhY(final, "Wiring Year")
+	if final["Plumbing Year"] == [] or isColEmpty(final['Plumbing Year']) == True:  
+		wprhY(final, 'Plumbing Year')
+	if final["Roofing Year"] == [] or isColEmpty(final['Roofing Year']) == True:    
+		wprhY(final, 'Roofing Year')
+	if final["Heating Year"] == [] or isColEmpty(final['Heating Year']) == True:   
+		wprhY(final, 'Heating Year')
 
-	if final["Fire Alarm Type"]==[] or isColEmpty(final['Fire Alarm Type'])==True: nonePlacer(final, "Fire Alarm Type")
-	if final["Burglar Alarm Type"]==[] or isColEmpty(final['Burglar Alarm Type'])==True: nonePlacer(final, "Burglar Alarm Type")
-	if final["Sprinkler Alarm Type"]==[] or isColEmpty(final['Sprinkler Alarm Type'])==True: sprinkAlarmType(final)
-	# sprinkWetDry(final)
+	if final["Fire Alarm Type"] == [] or isColEmpty(final['Fire Alarm Type']) == True: 
+		nonePlacer(final, "Fire Alarm Type")
+	if final["Burglar Alarm Type"] == [] or isColEmpty(final['Burglar Alarm Type']) == True: 
+		nonePlacer(final, "Burglar Alarm Type")
+	if final["Sprinkler Alarm Type"] == [] or isColEmpty(final['Sprinkler Alarm Type']) == True: 
+		sprinkAlarmType(final)
 	sprinkExtent(final)
+	convertBasements(final)
+	convertConstructionType(final)
 	populationCounter(final, 'State')
 
 	return final
@@ -185,21 +189,20 @@ def sprinkWetDry(final):
 
 def sprinkExtent(final):
 	"""
-	Adjusts the sprinkExtent to NONE FOR RIGHT NOW, NEED TO UNDERSTAND BUSINESS RULES FOR THIS
-	In amrisc, Percent Sprinklered takes anything but dan wants it in  100%, >50%, <=50%, how to manipulate thresholds for non amrisc?
+	Adjusts the Sprinkler Extent to the specified values. AmRisc deals in three percentages: 0%, 50%, and 100%. Not enough data
+	from other sheet types to decide whether to change the conditions to include ranges of numbers instead of hardcoded 0/50/100.
 	"""
-
 	sprinkExtent = final['Sprinkler Extent'][0]
 	locationNum = final['Loc #'][0]
 	for itemIndex in range(1, len(sprinkExtent)):
 		try:
-			if sprinkExtent[itemIndex] == 0.0:
+			if sprinkExtent[itemIndex] == 0.0 or sprinkExtent[itemIndex] == "0%":
 				sprinkExtent[itemIndex] = "None"
-			elif sprinkExtent[itemIndex] == 0.0 and locationNum[itemIndex] == "":
+			elif sprinkExtent[itemIndex] == 0.0 or sprinkExtent == "0" and locationNum[itemIndex] == "":
 				sprinkExtent[itemIndex] = ""
-			elif sprinkExtent[itemIndex] == 0.5:
+			elif sprinkExtent[itemIndex] == 0.5 or sprinkExtent[itemIndex] == "50%":
 				sprinkExtent[itemIndex] = "50%"
-			elif sprinkExtent[itemIndex] == 1.0:
+			elif sprinkExtent[itemIndex] == 1.0 or sprinkExtent[itemIndex] == "100%":
 				sprinkExtent[itemIndex] = "100%"
 			else:
 				sprinkExtent[itemIndex] = ""
@@ -208,22 +211,50 @@ def sprinkExtent(final):
 
 
 def sprinkAlarmType(final):
-	sprinkYN = final['Sprinkler Wet/Dry'][0]
-	sprnkList = ['Sprinkler Alarm Type']
-	sprnkTypeList = final['Sprinkler Alarm Type'].append(sprnkList)
-	sprinkType = final['Sprinkler Alarm Type'][0]
-	for cond in range(1, len(sprinkYN)):
-		try:
-			if sprinkYN[cond] == 'Y' or sprinkYN[cond] == 'y':
-				sprinkYN[cond] = "Wet"
-				sprinkType.append("Local")
-			elif sprinkYN[cond] == 'N' or sprinkYN[cond] == 'n':
-				sprinkYN[cond] = "None"
-				sprinkType.append("None")		
-			else:
-				sprinkYN[cond] = ""
-		except IndexError:
-			nonePlacer(final, "Sprinkler Alarm Type")
+	"""
+	Adjusts the Sprinkler Alarm Type column based on whether or not sprinklers are present. AmRisc denotes sprinklers
+	being present with a 'Y' or 'N', and other SoVs follow this habit as well. May have to change this later to work 
+	based off of the actual percentage since yes/no isn't universal.
+
+	Update 2/13/2017: Some AmRisc sheets don't even have a column "Sprinklered (Y/N)" for the program to pull information
+	from. Implemented a bigger try/except workaround that defaults to the percentage sprinklered to get some kind of input
+	regardless. Might pose a TA issue?
+	"""
+	try:
+		sprinkYN = final["Sprinkler Wet/Dry"][0]
+		sprnkList = ["Sprinkler Alarm Type"]
+		sprnkTypeList = final["Sprinkler Alarm Type"].append(sprnkList)
+		sprinkType = final["Sprinkler Alarm Type"][0]
+		for cond in range(1, len(sprinkYN)):
+			try:
+				if sprinkYN[cond].lower()  == 'y':
+					sprinkYN[cond] = "Wet"
+					sprinkType.append("Local")
+				elif sprinkYN[cond].lower() == 'n':
+					sprinkYN[cond] = "None"
+					sprinkType.append("None")		
+				else:
+					sprinkYN[cond] = ""
+			except IndexError:
+				nonePlacer(final, "Sprinkler Alarm Type")
+	except IndexError:
+		sprinkYN = final["Sprinkler Extent"][0]
+		sprnkATList = ["Sprinkler Alarm Type"]
+		sprnkWDList = ["Sprinkler Wet/Dry"]
+		sprnkTypeList = final["Sprinkler Alarm Type"].append(sprnkATList)
+		sprnkExtList = final["Sprinkler Wet/Dry"].append(sprnkWDList)
+		sprinkType = final["Sprinkler Alarm Type"][0]
+		sprinkWetDry = final["Sprinkler Wet/Dry"][0]
+		for cond in range(1, len(sprinkYN)):
+			try:
+				if sprinkYN[cond] >= 0.5 or sprinkYN[cond] == "50%" or sprinkYN[cond] == "100%":
+					sprinkWetDry.append("Wet")
+					sprinkType.append("Local")
+				else:
+					sprinkWetDry.append("None")
+					sprinkType.append("None")
+			except IndexError:
+				nonePlacer(final, "Sprinkler Alarm Type")	
 
 def street1Fix(final, street1):
 	#strips off the number from the street if it is there
@@ -249,8 +280,6 @@ def physicalBuildingNum(final, caption):
 	Param "final": Dictionary
 	Param "caption": String
 	"""
-	# print 'PHYSICAL BULDING NUMBER IS RUNNING '
-	# print caption
 	try:
 		streetArr = final["Street 1"][0][:]
 		streetArr.pop(0)
@@ -263,32 +292,116 @@ def physicalBuildingNum(final, caption):
 					holder = val[:space]
 					num1 = holder[:dash]
 					num2 = holder[dash+1:]
-					#print "the numval %s" %(num1)
-					#print "the numval %s" %(num2)
 				else:
 					num = val[:space]
-					#print "the numval %s" %(num)
 				try:
-					if caption == 'Single Physical Building #' and dash != -1: 
-						int(num2)
-						numTracker.append(str(num2))
-					elif caption == 'Single Physical Building #':
-						int(num)
-						numTracker.append(str(num))
+					if caption == "Single Physical Building #" and dash != -1: 
+						numTracker.append(int(num2))
+					elif caption == "Single Physical Building #":
+						numTracker.append(int(num))
+					elif caption == "Physical Building #":
+						numTracker.append(int(num))
 					else:
-						int(num1)
-						numTracker.append(str(num1))
+						numTracker.append(int(num1))
 				except ValueError:
 					pass
 			final[caption] = [numTracker]
 	except:
 		pass
 
-# def populateBasements(final):
-"""
-Add entry to dictionary? "Basement":"# Basements"
-"""
+def convertBasements(final):
+	"""
+	Takes the basement values provided on the SoV and converts it to either 0 for no basement
+	or 1 for a present basement.
+	"""
+	bsmtArray = final['# Basements'][0]
+	for item in range(1, len(bsmtArray)):
+		try:
+			if bsmtArray[item][:1] == "2":
+				bsmtArray[item] = 0
+			elif bsmtArray[item][:1] == "1":
+				bsmtArray[item] = 1
+			elif bsmtArray[item][:1] == "3":
+				bsmtArray[item] = 1
+			else:
+				bsmtArray[item] = ""
+		except ValueError:
+			nonePlacer(final, "# Basements")
 
+def convertConstructionType(final):
+	"""
+	Takes the values within the Construction Type column and converts them to the workstation's standard format
+	for construction types.
+	"""
+	sovConstTypes = final["Construction Type"][0]
+	constTypeDictionary = {
+		"brick frame":"1. Frame",
+		"frame":"1. Frame",
+		"brick veneer":"1. Frame",
+		"frame block":"1. Frame",
+		"heavy timber":"1. Frame",
+		"masonry frame":"1. Frame",
+		"masonry wood":"1. Frame",
+		"metal building":"1. Frame",
+		"sheet metal":"1. Frame",
+		"wood":"1. Frame",
+		"metal/aluminum":"1. Frame",
+		"brick":"2. Joisted Masonry",
+		"brick steel":"2. Joisted Masonry",
+		"cd":"2. Joisted Masonry",
+		"cement":"2. Joisted Masonry",
+		"concrete":"2. Joisted Masonry",
+		"masonry":"2. Joisted Masonry",
+		"masonry timbre":"2. Joisted Masonry",
+		"stone":"2. Joisted Masonry",
+		"stucco":"2. Joisted Masonry",
+		"joist masonry":"2. Joisted Masonry",
+		"tilt-up":"2. Joisted Masonry",
+		"jm":"2. Joisted Masonry",
+		"joisted masonry":"2. Joisted Masonry",
+		"joisted mason":"2. Joisted Masonry",
+		"j/masonry":"2. Joisted Masonry",
+		"jm / cbs":"2. Joisted Masonry",
+		"cb":"3. Non-Combustible",
+		"concrete block":"3. Non-Combustible",
+		"icm":"3. Non-Combustible",
+		"iron clad metal":"3. Non-Combustible",
+		"steel concrete":"3. Non-Combustible",
+		"steel cmu":"3. Non-Combustible",
+		"non-comb.":"3. Non-Combustible",
+		"non-comb":"3. Non-Combustible",
+		"pole":"3. Non-Combustible",
+		"non-combustible":"3. Non-Combustible",
+		"non-combustib":"3. Non-Combustible",
+		"cement block":"4. Masonry, Non-Combustible",
+		"cbs":"4. Masonry, Non-Combustible",
+		"mnc":"4. Masonry, Non-Combustible",
+		"ctu":"4. Masonry, Non-Combustible",
+		"concrete tilt-up":"4. Masonry, Non-Combustible",
+		"pre-cast com":"4. Masonry, Non-Combustible",
+		"reinforced concrete":"4. Masonry, Non-Combustible",
+		"masonry nc":"4. Masonry, Non-Combustible",
+		"masonry non-c":"4. Masonry, Non-Combustible",
+		"masonry non-combustible":"4. Masonry, Non-Combustible",
+		"mfr":"5. Modified Fire Resistive",
+		"modified fire resistive":"5. Modified Fire Resistive",
+		"aaa":"6. Fire Resistive",
+		"fire resistive":"6. Fire Resistive",
+		"cinder block":"6. Fire Resistive",
+		"steel":"6. Fire Resistive",
+		"steel frame":"6. Fire Resistive",
+		"superior":"6. Fire Resistive",
+		"w/r":"6. Fire Resistive",
+		"fire resist":"6. Fire Resistive",
+		"wind resistive":"6. Fire Resistive",
+		"fire resistiv":"6. Fire Resistive",
+		"fr":"6. Fire Resistive",
+	}
+
+	for index, item in enumerate(sovConstTypes):
+		for key in constTypeDictionary:
+			if sovConstTypes[index].lower() in constTypeDictionary.iterkeys():
+				sovConstTypes[index] = constTypeDictionary[item.lower()]
 
 def populationCounter(final, caption):
 	"""
@@ -340,26 +453,22 @@ def statesConverter(final, headerName):
 		final["State"]=states[headerName.lower().strip()]
 
 def isColEmpty(columnVals):
-	"""If there's no data in the column return True, if there is data return False
+	"""
+	If there's no data in the column return True, if there is data return False
 
 	Parameter: Takes an array of values
 	Precondition:inputs can be a double array[['AddressNum', '', '', '']] or a single empty array []
 											 ^--these two would return empty   ------------------------^         
 	"""
-
 	print "\nExecuting isColEmpty"
 	if columnVals==[]: 
-		# print "%s is totally empty" %(columnVals)
 		return True
-
 	notEmptyCount=0
 	for ArrayOrVal in columnVals:
 		if type(ArrayOrVal)==list:
-			# print "nested array: %s" %(ArrayOrVal)
 			for value in ArrayOrVal:
 				value=str(value)
 			 	if value!="":
-			 		# print "the Value: %s" %(value)
 			 		notEmptyCount+=1		
 	if notEmptyCount<=1:
 		return True
@@ -367,15 +476,22 @@ def isColEmpty(columnVals):
 		print "Column has more than 1 value in it, not empty"
 	 	return False
 
-
 def setnwrite (headSubCombined, fileName):
-	"""formats data and calls writer to actually wrtie the data"""
+	"""
+	Formats the data from the parameter headSubCombined and calls writer() to actually wrtie the data
+	to the Excel sheet. This is where the templates for the SoVs come into play.
 
+	TODO: Better method for switching between the templates. Take the formatting code and shove it in another function,
+	then call it based on what SoV is being processed?
+	"""
+
+	# Get instance of workbook and sheet
 	workbook = open_workbook(fileName[0])
 	sheet = workbook.sheet_by_index(0)
-	amriscCell1 = sheet.cell_value(0,0)
-	amriscCell2 = sheet.cell_value(0,1)
-	crcSwettCell = sheet.cell_value(10,0)
+	# Declare hardcoded locations on the sheet that signify what kind of sheet it should be 
+	amriscCell1 = sheet.cell_value(0,0) # "AmRisc Application / Schedule of Values"
+	amriscCell2 = sheet.cell_value(0,1) # Same as above but for when brokers "de-format" the spreadsheet somehow
+	crcSwettCell = sheet.cell_value(10,0) # "LOCATION INFORMATION"
 	amriscID = "AmRisc Application / Schedule of Values"
 	crcSwettID = "LOCATION INFORMATION"
 	
@@ -428,7 +544,7 @@ def setnwrite (headSubCombined, fileName):
 		'Roof Sheathing Attachment':41,
 		'Frame-Foundation Connection':42,
 		'Residential Appurtenant Structures':43
-		}
+	}
 
 	amrisc={
 		"Percent Sprinklered":"Sprinkler Extent",
@@ -455,8 +571,10 @@ def setnwrite (headSubCombined, fileName):
 		"Construction Description ":"Construction Type", 
 		"Construction Description (provide further details on construction features)":"Construction Type",
 		"ISO Prot Class":"Prot Class",
-		"*# of Units":"# Units"
-		}
+		"*# of Units":"# Units",
+		"*Basement":"# Basements",
+		"Basement":"# Basements"
+	}
 
 	crcSwett = {
 		"Loc  #":"Loc #",
@@ -479,9 +597,33 @@ def setnwrite (headSubCombined, fileName):
 		"Electrical":"Wiring Year",
 		"Roof":"Roofing Year",
 		"Sprinkler %":"Sprinkler Extent"
-		}
+	}	
 
-	
+	rps = {
+		"Loc. #":"Loc #",
+		"Bldg.":"Bldg #",
+		"Address":"Street 1",
+		"City":"City",
+		"County":"County",
+		"ST":"State",
+		"Zip Code":"Zip",
+		"Building":"Building Value",
+		"Contents ":"Business Personal Property",
+		"Business Income (Incl EE)":"Business Income",
+		"Other":"Misc Real Property",
+		"Total":"TIV",
+		"# of Units":"# Units",
+		"Occupancy":"Building Description",
+		"ISO Construction Code":"Construction Type",
+		"Protection Class Code":"Prot Class",
+		"No. Stories":"# Stories",
+		"% Sprinkler":"Sprinkler Extent",
+		"Year Wiring Updated":"Wiring Year",
+		"Year Plumbing Updated":"Plumbing Year",
+		"Year Roof Replaced":"Roofing Year",
+		"Year Heating updated":"Heating Year",
+		"Basement":"# Basements"
+	}
 	if amriscCell1.find(amriscID) != -1 or amriscCell2.find(amriscID) != -1:
 		minimum= min(headSubCombined, key=headSubCombined.get)-1
 		headerRow= headSubCombined[minimum]
@@ -531,9 +673,16 @@ def setnwrite (headSubCombined, fileName):
 		writer(final, work, workHeaderRow, crcSwett, fileName)
 
 def writer(final, workDict, workHeaderRow, template, sovFileName):
-	"""Does the writing"""
+	"""
+	Actually writes our data to the spreadsheet and produces our finished product
+	"""
 	workbook = xlwt.Workbook()
 	colWidth = 256 * 20
+
+	with open('E:\Work\Pycel\jonPycel\output\sheetFinal.txt', 'w') as stfnl:
+		stfnl.write("The contents of the dictionary final\n\n")
+		for key, value in final.iteritems():
+			stfnl.write('{0}: {1}\n'.format(key, value))
 
 	# HOW TO DO A CELL OVERWRITE AS A LAST RESORT IF NEEDED
 	# sheet = workbook.add_sheet("WKFC_Sheet1", cell_overwrite_ok=True)
@@ -543,18 +692,18 @@ def writer(final, workDict, workHeaderRow, template, sovFileName):
 		colIndex=workDict[key]
 		wordWrap = xlwt.easyxf('align: wrap on, horiz center')
 
-		if values==[]:
+		if values == []:
 			sheet.write(0, colIndex, key)
-			sheet.col(colIndex).width = 365 * (16)
+			sheet.col(colIndex).width = 365 * (0)
 		else:
 			valueArr = values[0]
 			for rowIndex in range(len(valueArr)):
 				if valueArr[rowIndex] in template:
 					sheet.write(rowIndex, colIndex, key, wordWrap)
-					sheet.col(colIndex).width = 365 * (16)
+					sheet.col(colIndex).width = 365 * (24)
 				else:
 					sheet.write(rowIndex, colIndex, valueArr[rowIndex], wordWrap)
-					sheet.col(colIndex).width = 365 * (16)
+					sheet.col(colIndex).width = 365 * (24)
 	
 	sovCheck = os.path.isfile(sovFileName[0])
 	if sovCheck == False:
