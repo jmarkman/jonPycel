@@ -3,29 +3,15 @@ from xlrd import open_workbook
 from unidecode import unidecode
 import sovinput as input
 
-"""
-This program will take a an SOV of a specific template (right now just amrisc)
-and convert its data into a workstation file
-
-This file will be written to the desktop as testDoc.xls (right now)
-
-To export this data to a database, run export.py and select this file  
-
-"""
 # Global variables
-userhome = os.path.expanduser('~/Desktop/') # Get the relative path of the current user, i.e. C:/Users/jmarkman/Desktop
-"""
-The "desktop" variable is hackneyed because os.path.expanduser can take a longer filepath argument, i.e., a Windows-based system can send '~/Documents/Folder1/Folder2/Folder3' and the value stored in the variable will be a relative filepath into Folder 3.
-
-http://stackoverflow.com/questions/2953828/accessing-relative-path-in-python
-"""
+userhome = os.path.expanduser('~/Desktop/') # Get the relative path of the current user
 
 def isEmptyRow(row):
-	"""If row is entirely empty 
+	"""
+	If row is entirely empty 
 
 	Parameter: array of values ['one','two','three']
 	"""
-	
 	maxLength = len(row)
 	emptyCheck = []
 	for value in row: # for each value in the array "row"
@@ -43,7 +29,6 @@ def sliceSubHeaderData(headerRowDict, sheet):
 
 	Returns: data from below the header row
 	"""
-
 	dataRowStartNumber=headerRowDict.keys()[0]+1
 	allData = input.loopAllRows(sheet)
 	subHeadData={}
@@ -65,7 +50,6 @@ def combine(headerRowDict,subHeaderData):
 
 	Returns: combined dictionary in format like above^
 	"""
-
 	headSubCombined = headerRowDict.copy()
 	headSubCombined.update(subHeaderData)
 	return headSubCombined
@@ -78,7 +62,6 @@ def findFileName(absPath):
 	Parameter: Absolute path to file i.e  C://Greg/Desktop/SOV_Name.xls
 	Returns: SOV_Name.xls
 	"""
-
 	slash = absPath.rfind('/')
 	dot = absPath.rfind('.')
 	name = absPath[slash+1:dot]
@@ -96,8 +79,8 @@ def getFileExtension(file):
 	return extension
 
 def comp_converter(comparisonDic):
-	"""Removes unwanted characters from dictionary
-	--see decompress
+	"""
+	Removes unwanted characters from dictionary, see decompress
 	"""
 	new={}
 	for key in comparisonDic:
@@ -107,7 +90,8 @@ def comp_converter(comparisonDic):
 	return new
 
 def decompress(value):
-	"""does the reconstruction of each value
+	"""
+	"does the reconstruction of each value"
 	
 	Greg ended up just setting each valued passed as an argument to the function to be cast to a string.
 
@@ -117,12 +101,12 @@ def decompress(value):
 	return value.lower().strip()
 
 def head_matcher(compressedDict, headerRow, fileName):
-	'''
+	"""
 	Parameters: compressedDict, headerRow, fileName
 		- compressedDict is the comparison dictionary
 		- headerRow is the dictionary returned from identifyHeaderRow
 		- fileName is the file we're working with, see ask()
-	'''
+	"""
 	decompressedRow=[]
 	for header in headerRow.itervalues().next():
 		header=decompress(header)
@@ -136,7 +120,7 @@ def head_matcher(compressedDict, headerRow, fileName):
 def adjustments(final):
 	"""
 	MASTER CALLER FOR ADJUSTMENETS
-	Adjusts the data
+	Adjusts the data based on the requirements for the workstation. 
 	"""
 	locNumFix(final,'Loc #')
 
@@ -144,7 +128,9 @@ def adjustments(final):
 		physicalBuildingNum(final, 'Physical Building #')
 	if final['Single Physical Building #'] == [] or isColEmpty(final['Single Physical Building #']) == True: 
 		physicalBuildingNum(final, "Single Physical Building #")
-	
+	writeRawStreet(final)
+	autoLocNum(final)
+	autoBldgNum(final)
 	street1Fix(final, "Street 1")
 
 	if final["State"] == [] or isColEmpty(final['State']) == True: 
@@ -172,21 +158,6 @@ def adjustments(final):
 
 	return final
 
-# sprinkWetDry() is most likely a deprecated function, do not uncomment until further notice
-'''
-def sprinkWetDry(final):
-	"""In amrisc, Column sprinkered Wet/Dry only accepts a Dry, Wet, None... this correct it to ____ and None
-	TODO: is it safe to just mark it as none if empty?
-	TODO: Amrisc has some limitations here, what should be the switch?"""
-
-	# for now only adjust the N setting in amrisc
-
-	sprinkWetDry=final['Sprinkler Wet/Dry'][0]
-	for itemIndex in range(len(sprinkWetDry)):
-		if sprinkWetDry[itemIndex] =="N":
-			sprinkWetDry[itemIndex]="None"
-'''
-
 def sprinkExtent(final):
 	"""
 	Adjusts the Sprinkler Extent to the specified values. AmRisc deals in three percentages: 0%, 50%, and 100%. Not enough data
@@ -202,6 +173,8 @@ def sprinkExtent(final):
 				sprinkExtent[itemIndex] = ""
 			elif sprinkExtent[itemIndex] == 0.5 or sprinkExtent[itemIndex] == "50%":
 				sprinkExtent[itemIndex] = "50%"
+			elif sprinkExtent[itemIndex] > 0.5 and  sprinkExtent[itemIndex] < 1.0 and sprinkExtent[itemIndex] != 0.0 and sprinkExtent[itemIndex] != "":
+				sprinkExtent[itemIndex] = "> 50%"			
 			elif sprinkExtent[itemIndex] == 1.0 or sprinkExtent[itemIndex] == "100%":
 				sprinkExtent[itemIndex] = "100%"
 			else:
@@ -256,6 +229,23 @@ def sprinkAlarmType(final):
 			except IndexError:
 				nonePlacer(final, "Sprinkler Alarm Type")	
 
+def writeRawStreet(final):
+	"""
+	Takes the raw street 1 input value and puts it into the delete column and attempts to rename the
+	column itself.
+	"""
+	try:
+		delCol = final["Delete"]
+		fullAddr = ["Full Street Address"]
+		delCol.append(fullAddr)
+		street1 = final["Street 1"][0]
+		fullStreetAddr = final["Delete"][0]
+		for street in range(1, len(street1)):
+			st = street1[street]
+			fullStreetAddr.append(st)
+	except IndexError:
+		pass	
+
 def street1Fix(final, street1):
 	#strips off the number from the street if it is there
 
@@ -269,7 +259,6 @@ def street1Fix(final, street1):
 		except:
 			pass
 	street1[0] = "Street 1"
-
 
 def physicalBuildingNum(final, caption):
 	"""
@@ -309,6 +298,52 @@ def physicalBuildingNum(final, caption):
 	except:
 		pass
 
+def checkIfSame(addrList):
+	"""
+	Uses the built-in all() function to check if a list contains ONLY a certain string.
+	Used to check if there is only one repeat address in the "Full Street Address" column.
+
+	Returns: boolean True/False 
+	"""
+	return all(x == addrList[0] for x in addrList)
+
+def autoLocNum(final):
+	"""
+	Adjusts the "Loc #" column to be "1" if all the addresses in "Full Street Address" are
+	the same.
+	"""
+	rawStreets = final["Delete"][0]
+	cleanRawStreets = [x for x in rawStreets if x != ""]
+	cleanRawStreets.remove("Full Street Address")
+	dupesBool = checkIfSame(cleanRawStreets)
+	if dupesBool == True:
+		bldgNum = final["Loc #"][0]
+		for item in range(1, len(cleanRawStreets) + 1):
+			bldgNum[item] = 1
+	else:
+		pass
+
+def autoBldgNum(final):
+	"""
+	Adjusts the building numbers to count off in ascending order if all the addresses in 
+	"Full Street Address" are the same.
+	"""
+	rawStreets = final["Delete"][0]
+	cleanRawStreets = [x for x in rawStreets if x != ""]
+	cleanRawStreets.remove("Full Street Address")
+	dupesBool = checkIfSame(cleanRawStreets)
+	if dupesBool == True:
+		bldgNum = final["Bldg #"]
+		number = ["Bldg"]
+		bldgNum.append(number)
+		wsBldgNum = final["Bldg #"][0]
+		i = 1
+		for item in cleanRawStreets:
+			wsBldgNum.append(i)
+			i += 1
+	else:
+		pass
+
 def convertBasements(final):
 	"""
 	Takes the basement values provided on the SoV and converts it to either 0 for no basement
@@ -337,6 +372,7 @@ def convertConstructionType(final):
 	constTypeDictionary = {
 		"brick frame":"1. Frame",
 		"frame":"1. Frame",
+		"frame ":"1. Frame",
 		"brick veneer":"1. Frame",
 		"frame block":"1. Frame",
 		"heavy timber":"1. Frame",
@@ -371,6 +407,7 @@ def convertConstructionType(final):
 		"non-comb.":"3. Non-Combustible",
 		"non-comb":"3. Non-Combustible",
 		"pole":"3. Non-Combustible",
+		"superior nc":"3. Non-Combustible",
 		"non-combustible":"3. Non-Combustible",
 		"non-combustib":"3. Non-Combustible",
 		"cement block":"4. Masonry, Non-Combustible",
@@ -386,6 +423,7 @@ def convertConstructionType(final):
 		"mfr":"5. Modified Fire Resistive",
 		"modified fire resistive":"5. Modified Fire Resistive",
 		"aaa":"6. Fire Resistive",
+		"fire res":"6. Fire Resistive",
 		"fire resistive":"6. Fire Resistive",
 		"cinder block":"6. Fire Resistive",
 		"steel":"6. Fire Resistive",
@@ -396,12 +434,14 @@ def convertConstructionType(final):
 		"wind resistive":"6. Fire Resistive",
 		"fire resistiv":"6. Fire Resistive",
 		"fr":"6. Fire Resistive",
+		"f.r.":"6. Fire Resistive",
+		"fr/wr":"6. Fire Resistive",
 	}
 
 	for index, item in enumerate(sovConstTypes):
 		for key in constTypeDictionary:
-			if sovConstTypes[index].lower() in constTypeDictionary.iterkeys():
-				sovConstTypes[index] = constTypeDictionary[item.lower()]
+			if sovConstTypes[index].lower().strip() in constTypeDictionary.iterkeys():
+				sovConstTypes[index] = constTypeDictionary[item.lower().strip()]
 
 def populationCounter(final, caption):
 	"""
@@ -443,14 +483,17 @@ def wprhY(final, headerName):
 		arr=final['Year Built'][:]
 		final[headerName]=arr
 
+# Possibly defunct method since the workstation takes abbreviations and not full state names. Maybe the reverse will be useful?
+"""
 def statesConverter(final, headerName):
-	"""Converts state abbreviation into full name """
+	 #Converts state abbreviation into full name
      # TODO test this
 	 # Amrisc SOV itself only accepts abbreviations, test on other templates
 
 	states={'mississippi': 'MS', 'oklahoma': 'OK', 'wyoming': 'WY', 'minnesota': 'MN', 'alaska': 'AK', 'arkansas': 'AR', 'new mexico': 'NM', 'indiana': 'IN', 'maryland': 'MD', 'louisiana': 'LA', 'texas': 'TX', 'tennessee': 'TN', 'iowa': 'IA', 'wisconsin': 'WI', 'arizona':'AZ', 'michigan': 'MI', 'kansas': 'KS', 'utah': 'UT', 'virginia': 'VA', 'oregon': 'OR', 'connecticut': 'CT', 'district of columbia': 'DC', 'new hampshire': 'NH', 'idaho': 'ID', 'west virginia': 'WV', 'south carolina': 'SC', 'california': 'CA', 'massachusetts': 'MA', 'vermont': 'VT', 'georgia': 'GA', 'north dakota': 'ND', 'pennsylvania': 'PA', 'puerto rico': 'PR', 'florida': 'FL', 'hawaii': 'HI', 'kentucky': 'KY', 'rhode island': 'RI', 'nebraska': 'NE', 'missouri': 'MO', 'ohio': 'OH', 'alabama': 'AL', 'illinois': 'IL', 'virgin islands': 'VI', 'south dakota': 'SD', 'colorado': 'CO', 'new jersey': 'NJ', 'washington':'WA', 'north carolina': 'NC', 'maine': 'ME', 'new york': 'NY', 'montana': 'MT','nevada': 'NV', 'delaware': 'DE'}
 	if headerName.lower().strip() in states:
 		final["State"]=states[headerName.lower().strip()]
+"""
 
 def isColEmpty(columnVals):
 	"""
@@ -491,8 +534,10 @@ def setnwrite (headSubCombined, fileName):
 	# Declare hardcoded locations on the sheet that signify what kind of sheet it should be 
 	amriscCell1 = sheet.cell_value(0,0) # "AmRisc Application / Schedule of Values"
 	amriscCell2 = sheet.cell_value(0,1) # Same as above but for when brokers "de-format" the spreadsheet somehow
+	amriscCell3 = sheet.cell_value(7,0) # Who makes these sheets?
 	crcSwettCell = sheet.cell_value(10,0) # "LOCATION INFORMATION"
-	amriscID = "AmRisc Application / Schedule of Values"
+	amriscID1 = "AmRisc Application / Schedule of Values"
+	amriscID2 = "Starred * information is needed to process the account."
 	crcSwettID = "LOCATION INFORMATION"
 	
 	workHeaderRow = ['Loc #', 'Bldg #', 'Delete', 'Physical Building #', 'Single Physical Building #', 'Street 1', 'Street 2', 'City', 'State', 'Zip', 'County', 'Validated Zip', 'Building Value', 'Business Personal Property', 'Business Income', 'Misc Real Property', 'TIV', '# Units', 'Building Description', 'ClassCodeDesc', 'Construction Type','Dist. To Fire Hydrant (Feet)', 'Dist. To Fire Station (Miles)', 'Prot Class', '# Stories', '# Basements', 'Year Built', 'Sq Ftg', 'Wiring Year', 'Plumbing Year', 'Roofing Year', 'Heating Year', 'Fire Alarm Type', 'Burglar Alarm Type', 'Sprinkler Alarm Type', 'Sprinkler Wet/Dry', 'Sprinkler Extent', 'Roof Covering', 'Roof Geometry', 'Roof Anchor', 'Cladding Type', 'Roof Sheathing Attachment', 'Frame-Foundation Connection', 'Residential Appurtenant Structures']
@@ -549,8 +594,20 @@ def setnwrite (headSubCombined, fileName):
 	amrisc={
 		"Percent Sprinklered":"Sprinkler Extent",
 		"Sprinklered (Y/N)":"Sprinkler Wet/Dry",
+		"Sprinkler Alarm Type":"Sprinkler Alarm Type",
+		"Sprinkler Wet/Dry":"Sprinkler Wet/Dry",
+		"Sprinkler Extent":"Sprinkler Extent",
+		"Physical Building #":"Physical Building #",
+		"Single Physical Building #":"Single Physical Building #",
+		"Street 1":"Street 1",
+		"Fire Alarm Type":"Fire Alarm Type",
+		"Burglar Alarm Type":"Burglar Alarm Type",
+		"Full Street Address":"Full Street Address",
+		"Delete":"Full Street Address",
 		"*Year Roof covering last fully replaced":"Roofing Year",
 		"* Bldg No.":"Loc #",
+		"Bldg":"Bldg #",
+		"Loc":"Loc #",
 		"*Orig Year Built":"Year Built",
 		"*Square Footage":"Sq Ftg",
 		"*# of Stories":"# Stories",
@@ -572,6 +629,8 @@ def setnwrite (headSubCombined, fileName):
 		"Construction Description (provide further details on construction features)":"Construction Type",
 		"ISO Prot Class":"Prot Class",
 		"*# of Units":"# Units",
+		"Fire Alarm Type":"Fire Alarm Type",
+		"Burglar Alarm Type":"Burglar Alarm Type",
 		"*Basement":"# Basements",
 		"Basement":"# Basements"
 	}
@@ -596,7 +655,17 @@ def setnwrite (headSubCombined, fileName):
 		"Heating":"Heating Year",
 		"Electrical":"Wiring Year",
 		"Roof":"Roofing Year",
-		"Sprinkler %":"Sprinkler Extent"
+		"Sprinkler %":"Sprinkler Extent",
+		"Sprinkler Alarm Type":"Sprinkler Alarm Type",
+		"Sprinkler Wet/Dry":"Sprinkler Wet/Dry",
+		"Sprinkler Extent":"Sprinkler Extent",
+		"Physical Building #":"Physical Building #",
+		"Fire Alarm Type":"Fire Alarm Type",
+		"Burglar Alarm Type":"Burglar Alarm Type",
+		"Single Physical Building #":"Single Physical Building #",
+		"Full Street Address":"Full Street Address",
+		"Delete":"Full Street Address",
+		"Street 1":"Street 1"
 	}	
 
 	rps = {
@@ -622,9 +691,17 @@ def setnwrite (headSubCombined, fileName):
 		"Year Plumbing Updated":"Plumbing Year",
 		"Year Roof Replaced":"Roofing Year",
 		"Year Heating updated":"Heating Year",
-		"Basement":"# Basements"
+		"Basement":"# Basements",
+		"Sprinkler Alarm Type":"Sprinkler Alarm Type",
+		"Sprinkler Wet/Dry":"Sprinkler Wet/Dry",
+		"Sprinkler Extent":"Sprinkler Extent",
+		"Physical Building #":"Physical Building #",
+		"Single Physical Building #":"Single Physical Building #",
+		"Full Street Address":"Full Street Address",
+		"Delete":"Full Street Address",
+		"Street 1":"Street 1"
 	}
-	if amriscCell1.find(amriscID) != -1 or amriscCell2.find(amriscID) != -1:
+	if amriscCell1.find(amriscID1) != -1 or amriscCell2.find(amriscID1) != -1 or amriscCell3.find(amriscID2) != -1:
 		minimum= min(headSubCombined, key=headSubCombined.get)-1
 		headerRow= headSubCombined[minimum]
 		sov_index={}
@@ -643,12 +720,6 @@ def setnwrite (headSubCombined, fileName):
 			if amrisc[key] in work:
 				final[amrisc[key]].append(columnDict[key])
 		final = adjustments(final)
-
-		#Debug
-		# with open('E:\Work\Pycel\jonPycel\output\sheetFinal.txt', 'w') as stfnl:
-		# 	stfnl.write("The contents of the dictionary final\n\n")
-		# 	for key, value in final.iteritems():
-		# 		stfnl.write('{0}: {1}\n'.format(key, value))
 
 		writer(final, work, workHeaderRow, amrisc, fileName)
 	elif crcSwettCell.find(crcSwettID) != -1:
@@ -677,34 +748,34 @@ def writer(final, workDict, workHeaderRow, template, sovFileName):
 	Actually writes our data to the spreadsheet and produces our finished product
 	"""
 	workbook = xlwt.Workbook()
-	colWidth = 256 * 20
+	colWidth = 365 * 18
+	rowHeight = 256
+	wordWrapHeader = xlwt.easyxf('align: horiz center; font: bold on')
+	wordWrap = xlwt.easyxf('align: horiz center')
 
-	with open('E:\Work\Pycel\jonPycel\output\sheetFinal.txt', 'w') as stfnl:
-		stfnl.write("The contents of the dictionary final\n\n")
-		for key, value in final.iteritems():
-			stfnl.write('{0}: {1}\n'.format(key, value))
-
-	# HOW TO DO A CELL OVERWRITE AS A LAST RESORT IF NEEDED
+	# HOW TO DO A CELL OVERWRITE AS A LAST RESORT IF NEEDED - greg
 	# sheet = workbook.add_sheet("WKFC_Sheet1", cell_overwrite_ok=True)
 	sheet = workbook.add_sheet("WKFC_Sheet1")
 
 	for key, values in final.iteritems():
-		colIndex=workDict[key]
-		wordWrap = xlwt.easyxf('align: wrap on, horiz center')
+		colIndex = workDict[key]
 
 		if values == []:
-			sheet.write(0, colIndex, key)
-			sheet.col(colIndex).width = 365 * (0)
+			sheet.write(0, colIndex, key, wordWrapHeader)
+			sheet.col(colIndex).width = 0
+			sheet.row(rowIndex).height = rowHeight
 		else:
 			valueArr = values[0]
 			for rowIndex in range(len(valueArr)):
 				if valueArr[rowIndex] in template:
-					sheet.write(rowIndex, colIndex, key, wordWrap)
-					sheet.col(colIndex).width = 365 * (24)
+					sheet.write(rowIndex, colIndex, key, wordWrapHeader)
+					sheet.col(colIndex).width = colWidth
+					sheet.row(rowIndex).height = rowHeight
 				else:
 					sheet.write(rowIndex, colIndex, valueArr[rowIndex], wordWrap)
-					sheet.col(colIndex).width = 365 * (24)
-	
+					sheet.col(colIndex).width = colWidth
+					sheet.row(rowIndex).height = rowHeight
+		
 	sovCheck = os.path.isfile(sovFileName[0])
 	if sovCheck == False:
 		workbook.save(sovFileName[0])
