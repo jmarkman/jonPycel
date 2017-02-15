@@ -8,7 +8,9 @@ from unidecode import unidecode
 import sovinput as pycelInput
 
 # Global variables
-userhome = os.path.expanduser('~/Desktop/') # Get the relative path of the current user
+# Get the relative path of the current user
+userhome = os.path.expanduser('~/Desktop/')
+
 
 def isEmptyRow(row):
     """
@@ -18,11 +20,12 @@ def isEmptyRow(row):
     """
     maxLength = len(row)
     emptyCheck = []
-    for value in row: # for each value in the array "row"
+    for value in row:  # for each value in the array "row"
         if value == '':
             emptyCheck.append(value)
     if len(emptyCheck) == maxLength:
         return True
+
 
 def sliceSubHeaderData(headerRowDict, sheet):
     """Gets relevant data below header row
@@ -32,7 +35,7 @@ def sliceSubHeaderData(headerRowDict, sheet):
 
     Returns: data from below the header row
     """
-    dataRowStartNumber = headerRowDict.keys()[0]+1
+    dataRowStartNumber = headerRowDict.keys()[0] + 1
     allData = pycelInput.loopAllRows(sheet)
     subHeadData = {}
     for key in allData:
@@ -43,6 +46,7 @@ def sliceSubHeaderData(headerRowDict, sheet):
             if key in range(dataRowStartNumber, len(allData)) and isEmp == False:
                 subHeadData[key] = allData[key]
     return subHeadData
+
 
 def combine(headerRowDict, subHeaderData):
     """Combines the header row and subheader row into a singular dictionary
@@ -65,8 +69,9 @@ def findFileName(absPath):
     """
     slash = absPath.rfind('/')
     dot = absPath.rfind('.')
-    name = absPath[slash+1:dot]
+    name = absPath[slash + 1:dot]
     return name
+
 
 def getFileExtension(file):
     """Extracts the file extension from the given file. Somewhat necessary(?) for
@@ -79,6 +84,7 @@ def getFileExtension(file):
     extension = file[dot:]
     return extension
 
+
 def comp_converter(comparisonDic):
     """Removes unwanted characters from dictionary, see decompress
     """
@@ -88,6 +94,7 @@ def comp_converter(comparisonDic):
         key = decompress(key)
         new[key] = val
     return new
+
 
 def decompress(value):
     """'does the reconstruction of each value'
@@ -99,6 +106,7 @@ def decompress(value):
     """
     value = str(value)
     return value.lower().strip()
+
 
 def head_matcher(compressedDict, headerRow, fileName):
     """
@@ -113,7 +121,7 @@ def head_matcher(compressedDict, headerRow, fileName):
         if header in compressedDict:
             decompressedRow.append(compressedDict[header])
         else:
-            decompressedRow.append("XX"+header)
+            decompressedRow.append("XX" + header)
     return headerRow
 
 
@@ -130,7 +138,7 @@ def adjustments(final):
     writeRawStreet(final)
     autoLocNum(final)
     autoBldgNum(final)
-    street1Fix(final, "Street 1")
+    stripStreetNum(final, "Street 1")
 
     if final["State"] == [] or isColEmpty(final['State']) == True:
         statesConverter(final, "State")
@@ -157,6 +165,7 @@ def adjustments(final):
 
     return final
 
+
 def sprinkExtent(final):
     """Adjusts the Sprinkler Extent to the specified values. AmRisc deals in three percentages:
     0%, 50%, and 100%. Not enough data from other sheet types to decide whether to change the
@@ -172,7 +181,7 @@ def sprinkExtent(final):
                 sprinkExtent[itemIndex] = ""
             elif sprinkExtent[itemIndex] == 0.5 or sprinkExtent[itemIndex] == "50%":
                 sprinkExtent[itemIndex] = "50%"
-            elif sprinkExtent[itemIndex] > 0.5 and  sprinkExtent[itemIndex] < 1.0 and sprinkExtent[itemIndex] != 0.0 and sprinkExtent[itemIndex] != "":
+            elif sprinkExtent[itemIndex] > 0.5 and sprinkExtent[itemIndex] < 1.0 and sprinkExtent[itemIndex] != 0.0 and sprinkExtent[itemIndex] != "":
                 sprinkExtent[itemIndex] = "> 50%"
             elif sprinkExtent[itemIndex] == 1.0 or sprinkExtent[itemIndex] == "100%":
                 sprinkExtent[itemIndex] = "100%"
@@ -185,7 +194,7 @@ def sprinkExtent(final):
 def sprinkAlarmType(final):
     """Adjusts the Sprinkler Alarm Type column based on whether or not sprinklers are present.
     AmRisc denotes sprinklers being present with a 'Y' or 'N', and other SoVs follow this.
-    May have to change this later to work based off of the actual percentage since yes/no 
+    May have to change this later to work based off of the actual percentage since yes/no
     isn't universal.
 
     Update 2/13/2017: Some AmRisc sheets don't even have a column "Sprinklered (Y/N)" for
@@ -229,9 +238,10 @@ def sprinkAlarmType(final):
             except IndexError:
                 nonePlacer(final, "Sprinkler Alarm Type")
 
+
 def writeRawStreet(final):
-    """Takes the raw street 1 input value and puts it into the delete column and attempts to rename the
-    column itself.
+    """Takes the raw street 1 input value and puts it into the delete column and
+    attempts to rename the column itself.
     """
     try:
         delCol = final["Delete"]
@@ -245,19 +255,35 @@ def writeRawStreet(final):
     except IndexError:
         pass
 
-def street1Fix(final, street1):
-    #strips off the number from the street if it is there
+
+def stripStreetNum(final, street1):
+    # strips off the number from the street if it is there
 
     street1 = final[street1][0]
     for index in range(len(street1)):
         space = street1[index].find(' ')
         posNumber = street1[index][:space]
-        try:
-            posNumber = posNumber.replace('-', ' ')
-            street1[index] = street1[index][space:].strip()
-        except:
+        if street1[index][0].isdigit():
+            try:
+                posNumber = posNumber.replace('-', '')
+                street1[index] = street1[index][space:].strip()
+            except:
+                pass
+        else:
             pass
     street1[0] = "Street 1"
+
+
+# def stripStreet2(final):
+#     source = final["Street 1"][0]
+
+
+# def checkIfValidStreet2(addrList):
+#     variations = ["suite", "ste", "bldg", "bld", '#']
+#     for item in addrList:
+#         address = addrList[item].tolower()
+#         for x in variations:
+#             if x in address.split():
 
 def physicalBuildingNum(final, caption):
     """Takes the street numbers from the address contained within (for AmRisc) "*Street Address",
@@ -278,7 +304,7 @@ def physicalBuildingNum(final, caption):
                 if dash > 0:
                     holder = val[:space]
                     num1 = holder[:dash]
-                    num2 = holder[dash+1:]
+                    num2 = holder[dash + 1:]
                 else:
                     num = val[:space]
                 try:
@@ -296,6 +322,7 @@ def physicalBuildingNum(final, caption):
     except:
         pass
 
+
 def checkIfSame(addrList):
     """Uses the built-in all() function to check if a list contains ONLY a certain string.
     Used to check if there is only one repeat address in the "Full Street Address" column.
@@ -303,6 +330,7 @@ def checkIfSame(addrList):
     Returns: boolean
     """
     return all(x == addrList[0] for x in addrList)
+
 
 def autoLocNum(final):
     """Adjusts the "Loc #" column to be "1" if all the addresses in "Full Street Address" are
@@ -318,6 +346,7 @@ def autoLocNum(final):
             bldgNum[item] = 1
     else:
         pass
+
 
 def autoBldgNum(final):
     """Adjusts the building numbers to count off in ascending order if all the addresses in
@@ -339,6 +368,7 @@ def autoBldgNum(final):
     else:
         pass
 
+
 def convertBasements(final):
     """Takes the basement values provided on the SoV and converts it to either 0 for no basement
     or 1 for a present basement.
@@ -357,84 +387,87 @@ def convertBasements(final):
         except ValueError:
             nonePlacer(final, "# Basements")
 
+
 def convertConstructionType(final):
     """Takes the values within the Construction Type column and converts them to
     the workstation's standard format for construction types.
     """
     sovConstTypes = final["Construction Type"][0]
     constTypeDictionary = {
-        "brick frame":"1. Frame",
-        "frame":"1. Frame",
-        "frame ":"1. Frame",
-        "brick veneer":"1. Frame",
-        "frame block":"1. Frame",
-        "heavy timber":"1. Frame",
-        "masonry frame":"1. Frame",
-        "masonry wood":"1. Frame",
-        "metal building":"1. Frame",
-        "sheet metal":"1. Frame",
-        "wood":"1. Frame",
-        "metal/aluminum":"1. Frame",
-        "brick":"2. Joisted Masonry",
-        "brick steel":"2. Joisted Masonry",
-        "cd":"2. Joisted Masonry",
-        "cement":"2. Joisted Masonry",
-        "concrete":"2. Joisted Masonry",
-        "masonry":"2. Joisted Masonry",
-        "masonry timbre":"2. Joisted Masonry",
-        "stone":"2. Joisted Masonry",
-        "stucco":"2. Joisted Masonry",
-        "joist masonry":"2. Joisted Masonry",
-        "tilt-up":"2. Joisted Masonry",
-        "jm":"2. Joisted Masonry",
-        "joisted masonry":"2. Joisted Masonry",
-        "joisted mason":"2. Joisted Masonry",
-        "j/masonry":"2. Joisted Masonry",
-        "jm / cbs":"2. Joisted Masonry",
-        "cb":"3. Non-Combustible",
-        "concrete block":"3. Non-Combustible",
-        "icm":"3. Non-Combustible",
-        "iron clad metal":"3. Non-Combustible",
-        "steel concrete":"3. Non-Combustible",
-        "steel cmu":"3. Non-Combustible",
-        "non-comb.":"3. Non-Combustible",
-        "non-comb":"3. Non-Combustible",
-        "pole":"3. Non-Combustible",
-        "superior nc":"3. Non-Combustible",
-        "non-combustible":"3. Non-Combustible",
-        "non-combustib":"3. Non-Combustible",
-        "cement block":"4. Masonry, Non-Combustible",
-        "cbs":"4. Masonry, Non-Combustible",
-        "mnc":"4. Masonry, Non-Combustible",
-        "ctu":"4. Masonry, Non-Combustible",
-        "concrete tilt-up":"4. Masonry, Non-Combustible",
-        "pre-cast com":"4. Masonry, Non-Combustible",
-        "reinforced concrete":"4. Masonry, Non-Combustible",
-        "masonry nc":"4. Masonry, Non-Combustible",
-        "masonry non-c":"4. Masonry, Non-Combustible",
-        "masonry non-combustible":"4. Masonry, Non-Combustible",
-        "mfr":"5. Modified Fire Resistive",
-        "modified fire resistive":"5. Modified Fire Resistive",
-        "aaa":"6. Fire Resistive",
-        "fire res":"6. Fire Resistive",
-        "fire resistive":"6. Fire Resistive",
-        "cinder block":"6. Fire Resistive",
-        "steel":"6. Fire Resistive",
-        "steel frame":"6. Fire Resistive",
-        "superior":"6. Fire Resistive",
-        "w/r":"6. Fire Resistive",
-        "fire resist":"6. Fire Resistive",
-        "wind resistive":"6. Fire Resistive",
-        "fire resistiv":"6. Fire Resistive",
-        "fr":"6. Fire Resistive",
-        "f.r.":"6. Fire Resistive",
-        "fr/wr":"6. Fire Resistive",
+        "brick frame": "1. Frame",
+        "frame": "1. Frame",
+        "frame ": "1. Frame",
+        "brick veneer": "1. Frame",
+        "frame block": "1. Frame",
+        "heavy timber": "1. Frame",
+        "masonry frame": "1. Frame",
+        "masonry wood": "1. Frame",
+        "metal building": "1. Frame",
+        "sheet metal": "1. Frame",
+        "wood": "1. Frame",
+        "metal/aluminum": "1. Frame",
+        "brick": "2. Joisted Masonry",
+        "brick steel": "2. Joisted Masonry",
+        "cd": "2. Joisted Masonry",
+        "cement": "2. Joisted Masonry",
+        "concrete": "2. Joisted Masonry",
+        "masonry": "2. Joisted Masonry",
+        "masonry timbre": "2. Joisted Masonry",
+        "stone": "2. Joisted Masonry",
+        "stucco": "2. Joisted Masonry",
+        "joist masonry": "2. Joisted Masonry",
+        "tilt-up": "2. Joisted Masonry",
+        "jm": "2. Joisted Masonry",
+        "joisted masonry": "2. Joisted Masonry",
+        "joisted mason": "2. Joisted Masonry",
+        "j/masonry": "2. Joisted Masonry",
+        "jm / cbs": "2. Joisted Masonry",
+        "cb": "3. Non-Combustible",
+        "concrete block": "3. Non-Combustible",
+        "icm": "3. Non-Combustible",
+        "iron clad metal": "3. Non-Combustible",
+        "steel concrete": "3. Non-Combustible",
+        "steel cmu": "3. Non-Combustible",
+        "non-comb.": "3. Non-Combustible",
+        "non-comb": "3. Non-Combustible",
+        "pole": "3. Non-Combustible",
+        "superior nc": "3. Non-Combustible",
+        "non-combustible": "3. Non-Combustible",
+        "non-combustib": "3. Non-Combustible",
+        "cement block": "4. Masonry, Non-Combustible",
+        "cbs": "4. Masonry, Non-Combustible",
+        "mnc": "4. Masonry, Non-Combustible",
+        "ctu": "4. Masonry, Non-Combustible",
+        "concrete tilt-up": "4. Masonry, Non-Combustible",
+        "pre-cast com": "4. Masonry, Non-Combustible",
+        "reinforced concrete": "4. Masonry, Non-Combustible",
+        "masonry nc": "4. Masonry, Non-Combustible",
+        "masonry non-c": "4. Masonry, Non-Combustible",
+        "masonry non-combustible": "4. Masonry, Non-Combustible",
+        "mfr": "5. Modified Fire Resistive",
+        "modified fire resistive": "5. Modified Fire Resistive",
+        "aaa": "6. Fire Resistive",
+        "fire res": "6. Fire Resistive",
+        "fire resistive": "6. Fire Resistive",
+        "cinder block": "6. Fire Resistive",
+        "steel": "6. Fire Resistive",
+        "steel frame": "6. Fire Resistive",
+        "superior": "6. Fire Resistive",
+        "w/r": "6. Fire Resistive",
+        "fire resist": "6. Fire Resistive",
+        "wind resistive": "6. Fire Resistive",
+        "fire resistiv": "6. Fire Resistive",
+        "fr": "6. Fire Resistive",
+        "f.r.": "6. Fire Resistive",
+        "fr/wr": "6. Fire Resistive",
     }
 
     for index, item in enumerate(sovConstTypes):
         for key in constTypeDictionary:
             if sovConstTypes[index].lower().strip() in constTypeDictionary.iterkeys():
-                sovConstTypes[index] = constTypeDictionary[item.lower().strip()]
+                sovConstTypes[index] = constTypeDictionary[
+                    item.lower().strip()]
+
 
 def populationCounter(final, caption):
     """Returns the number of non empty rows in the column specified by caption
@@ -450,11 +483,13 @@ def populationCounter(final, caption):
             nonEmptyCount += 1
     return nonEmptyCount
 
+
 def locNumFix(final, headerName):
     """Splices the location numbers to the appropriate length based on state
     """
     toWriteCount = populationCounter(final, "State")
     final[headerName][0] = final[headerName][0][:toWriteCount]
+
 
 def nonePlacer(final, headerName):
     """Places None in the entire column
@@ -468,6 +503,7 @@ def nonePlacer(final, headerName):
         toWriteRow.append('None')
     toWriteRow[0] = headerName
     final[headerName].append(toWriteRow)
+
 
 def wprhY(final, headerName):
     """For wiring, plumbing, roofing, heating year. If emtpy fill their contents with the
@@ -490,6 +526,7 @@ def statesConverter(final, headerName):
         final["State"]=states[headerName.lower().strip()]
 """
 
+
 def isColEmpty(columnVals):
     """If there's no data in the column return True, if there is data return False
 
@@ -505,12 +542,13 @@ def isColEmpty(columnVals):
             for value in ArrayOrVal:
                 value = str(value)
                 if value != "":
-                     notEmptyCount += 1
+                    notEmptyCount += 1
     if notEmptyCount <= 1:
         return True
     else:
         print "Column has more than 1 value in it, not empty"
         return False
+
 
 def setnwrite(headSubCombined, fileName):
     """Formats the data from the parameter headSubCombined and calls writer()
@@ -524,190 +562,194 @@ def setnwrite(headSubCombined, fileName):
     # Get instance of workbook and sheet
     workbook = open_workbook(fileName[0])
     sheet = workbook.sheet_by_index(0)
-    # Declare hardcoded locations on the sheet that signify what kind of sheet it should be
-    amriscCell1 = sheet.cell_value(0,0) # "AmRisc Application / Schedule of Values"
-    amriscCell2 = sheet.cell_value(0,1) # Same as above but for when brokers "de-format" the spreadsheet somehow
-    amriscCell3 = sheet.cell_value(7,0) # Who makes these sheets?
-    crcSwettCell = sheet.cell_value(10,0) # "LOCATION INFORMATION"
+    # Declare hardcoded locations on the sheet that signify what kind of sheet
+    # it should be
+    # "AmRisc Application / Schedule of Values"
+    amriscCell1 = sheet.cell_value(0, 0)
+    # Same as above but for when brokers "de-format" the spreadsheet somehow
+    amriscCell2 = sheet.cell_value(0, 1)
+    amriscCell3 = sheet.cell_value(7, 0)  # Who makes these sheets?
+    crcSwettCell = sheet.cell_value(10, 0)  # "LOCATION INFORMATION"
     amriscID1 = "AmRisc Application / Schedule of Values"
     amriscID2 = "Starred * information is needed to process the account."
     crcSwettID = "LOCATION INFORMATION"
 
-    workHeaderRow = ['Loc #', 'Bldg #', 'Delete', 'Physical Building #', 'Single Physical Building #', 'Street 1', 'Street 2', 'City', 'State', 'Zip', 'County', 'Validated Zip', 'Building Value', 'Business Personal Property', 'Business Income', 'Misc Real Property', 'TIV', '# Units', 'Building Description', 'ClassCodeDesc', 'Construction Type','Dist. To Fire Hydrant (Feet)', 'Dist. To Fire Station (Miles)', 'Prot Class', '# Stories', '# Basements', 'Year Built', 'Sq Ftg', 'Wiring Year', 'Plumbing Year', 'Roofing Year', 'Heating Year', 'Fire Alarm Type', 'Burglar Alarm Type', 'Sprinkler Alarm Type', 'Sprinkler Wet/Dry', 'Sprinkler Extent', 'Roof Covering', 'Roof Geometry', 'Roof Anchor', 'Cladding Type', 'Roof Sheathing Attachment', 'Frame-Foundation Connection', 'Residential Appurtenant Structures']
+    workHeaderRow = ['Loc #', 'Bldg #', 'Delete', 'Physical Building #', 'Single Physical Building #', 'Street 1', 'Street 2', 'City', 'State', 'Zip', 'County', 'Validated Zip', 'Building Value', 'Business Personal Property', 'Business Income', 'Misc Real Property', 'TIV', '# Units', 'Building Description', 'ClassCodeDesc', 'Construction Type',
+                     'Dist. To Fire Hydrant (Feet)', 'Dist. To Fire Station (Miles)', 'Prot Class', '# Stories', '# Basements', 'Year Built', 'Sq Ftg', 'Wiring Year', 'Plumbing Year', 'Roofing Year', 'Heating Year', 'Fire Alarm Type', 'Burglar Alarm Type', 'Sprinkler Alarm Type', 'Sprinkler Wet/Dry', 'Sprinkler Extent', 'Roof Covering', 'Roof Geometry', 'Roof Anchor', 'Cladding Type', 'Roof Sheathing Attachment', 'Frame-Foundation Connection', 'Residential Appurtenant Structures']
 
     final = {key: [] for key in workHeaderRow}
 
-    work={
-        'Loc #':0,
-        'Bldg #':1,
-        'Delete':2,
-        'Physical Building #':3,
-        'Single Physical Building #':4,
-        'Street 1':5,
-        'Street 2':6,
-        'City':7,
-        'State':8,
-        'Zip':9,
-        'County':10,
-        'Validated Zip':11,
-        'Building Value':12,
-        'Business Personal Property':13,
-        'Business Income':14,
-        'Misc Real Property':15,
-        'TIV':16,
-        '# Units':17,
-        'Building Description':18,
-        'ClassCodeDesc':19,
-        'Construction Type':20,
-        'Dist. To Fire Hydrant (Feet)':21,
-        'Dist. To Fire Station (Miles)':22,
-        'Prot Class':23,
-        '# Stories':24,
-        '# Basements':25,
-        'Year Built':26,
-        'Sq Ftg':27,
-        'Wiring Year':28,
-        'Plumbing Year':29,
-        'Roofing Year':30,
-        'Heating Year':31,
-        'Fire Alarm Type':32,
-        'Burglar Alarm Type':33,
-        'Sprinkler Alarm Type':34,
-        'Sprinkler Wet/Dry':35,
-        'Sprinkler Extent':36,
-        'Roof Covering':37,
-        'Roof Geometry':38,
-        'Roof Anchor':39,
-        'Cladding Type':40,
-        'Roof Sheathing Attachment':41,
-        'Frame-Foundation Connection':42,
-        'Residential Appurtenant Structures':43
+    work = {
+        'Loc #': 0,
+        'Bldg #': 1,
+        'Delete': 2,
+        'Physical Building #': 3,
+        'Single Physical Building #': 4,
+        'Street 1': 5,
+        'Street 2': 6,
+        'City': 7,
+        'State': 8,
+        'Zip': 9,
+        'County': 10,
+        'Validated Zip': 11,
+        'Building Value': 12,
+        'Business Personal Property': 13,
+        'Business Income': 14,
+        'Misc Real Property': 15,
+        'TIV': 16,
+        '# Units': 17,
+        'Building Description': 18,
+        'ClassCodeDesc': 19,
+        'Construction Type': 20,
+        'Dist. To Fire Hydrant (Feet)': 21,
+        'Dist. To Fire Station (Miles)': 22,
+        'Prot Class': 23,
+        '# Stories': 24,
+        '# Basements': 25,
+        'Year Built': 26,
+        'Sq Ftg': 27,
+        'Wiring Year': 28,
+        'Plumbing Year': 29,
+        'Roofing Year': 30,
+        'Heating Year': 31,
+        'Fire Alarm Type': 32,
+        'Burglar Alarm Type': 33,
+        'Sprinkler Alarm Type': 34,
+        'Sprinkler Wet/Dry': 35,
+        'Sprinkler Extent': 36,
+        'Roof Covering': 37,
+        'Roof Geometry': 38,
+        'Roof Anchor': 39,
+        'Cladding Type': 40,
+        'Roof Sheathing Attachment': 41,
+        'Frame-Foundation Connection': 42,
+        'Residential Appurtenant Structures': 43
     }
 
-    amrisc={
-        "Percent Sprinklered":"Sprinkler Extent",
-        "Sprinklered (Y/N)":"Sprinkler Wet/Dry",
-        "Sprinkler Alarm Type":"Sprinkler Alarm Type",
-        "Sprinkler Wet/Dry":"Sprinkler Wet/Dry",
-        "Sprinkler Extent":"Sprinkler Extent",
-        "Physical Building #":"Physical Building #",
-        "Single Physical Building #":"Single Physical Building #",
-        "Street 1":"Street 1",
-        "Fire Alarm Type":"Fire Alarm Type",
-        "Burglar Alarm Type":"Burglar Alarm Type",
-        "Full Street Address":"Full Street Address",
-        "Delete":"Full Street Address",
-        "*Year Roof covering last fully replaced":"Roofing Year",
-        "* Bldg No.":"Loc #",
-        "Bldg":"Bldg #",
-        "Loc":"Loc #",
-        "*Orig Year Built":"Year Built",
-        "*Square Footage":"Sq Ftg",
-        "*# of Stories":"# Stories",
-        "AddressNum":"Physical Building #",
-        "*Street Address":"Street 1",
-        "*City":"City",
-        "*State Code":"State",
-        "*Zip":"Zip",
-        "County":"County",
-        "*Real Property Value ($)":"Building Value",
-        "Personal Property Value ($)":"Business Personal Property",
-        "personal property value  ($)":"Business Personal Property",
-        "Personal Property Value ($) ":"Business Personal Property",
-        "Other Value $ (outdoor prop & Eqpt must be sch'd)":"Misc Real Property",
-        "BI/Rental Income ($)":"Business Income",
-        "*Total TIV":"TIV",
-        "*Occupancy":"Building Description",
-        "Construction Description ":"Construction Type",
-        "Construction Description (provide further details on construction features)":"Construction Type",
-        "ISO Prot Class":"Prot Class",
-        "*# of Units":"# Units",
-        "Fire Alarm Type":"Fire Alarm Type",
-        "Burglar Alarm Type":"Burglar Alarm Type",
-        "*Basement":"# Basements",
-        "Basement":"# Basements"
+    amrisc = {
+        "Percent Sprinklered": "Sprinkler Extent",
+        "Sprinklered (Y/N)": "Sprinkler Wet/Dry",
+        "Sprinkler Alarm Type": "Sprinkler Alarm Type",
+        "Sprinkler Wet/Dry": "Sprinkler Wet/Dry",
+        "Sprinkler Extent": "Sprinkler Extent",
+        "Physical Building #": "Physical Building #",
+        "Single Physical Building #": "Single Physical Building #",
+        "Street 1": "Street 1",
+        "Fire Alarm Type": "Fire Alarm Type",
+        "Burglar Alarm Type": "Burglar Alarm Type",
+        "Full Street Address": "Full Street Address",
+        "Delete": "Full Street Address",
+        "*Year Roof covering last fully replaced": "Roofing Year",
+        "* Bldg No.": "Loc #",
+        "Bldg": "Bldg #",
+        "Loc": "Loc #",
+        "*Orig Year Built": "Year Built",
+        "*Square Footage": "Sq Ftg",
+        "*# of Stories": "# Stories",
+        "AddressNum": "Physical Building #",
+        "*Street Address": "Street 1",
+        "*City": "City",
+        "*State Code": "State",
+        "*Zip": "Zip",
+        "County": "County",
+        "*Real Property Value ($)": "Building Value",
+        "Personal Property Value ($)": "Business Personal Property",
+        "personal property value  ($)": "Business Personal Property",
+        "Personal Property Value ($) ": "Business Personal Property",
+        "Other Value $ (outdoor prop & Eqpt must be sch'd)": "Misc Real Property",
+        "BI/Rental Income ($)": "Business Income",
+        "*Total TIV": "TIV",
+        "*Occupancy": "Building Description",
+        "Construction Description ": "Construction Type",
+        "Construction Description (provide further details on construction features)": "Construction Type",
+        "ISO Prot Class": "Prot Class",
+        "*# of Units": "# Units",
+        "Fire Alarm Type": "Fire Alarm Type",
+        "Burglar Alarm Type": "Burglar Alarm Type",
+        "*Basement": "# Basements",
+        "Basement": "# Basements"
     }
 
     crcSwett = {
-        "Loc  #":"Loc #",
-        "Location Street Address:":"Street 1",
-        "City":"City",
-        "State":"State",
-        "Zip Code":"Zip",
-        "Building Value":"Building Value",
-        "Content":"Business Personal Property",
-        "BI w/ EE":"Business Income",
-        "Total TIV":"TIV",
-        "# Apt  Units":"# Units",
-        "Building Occupancy":"Building Description",
-        "Construction":"Construction Type",
-        "# of Stories":"# Stories",
-        "Yr Built Gut/Reh":"Year Built",
-        "Total Building  Area":"Sq Ftg",
-        "Plumbing":"Plumbing Year",
-        "Heating":"Heating Year",
-        "Electrical":"Wiring Year",
-        "Roof":"Roofing Year",
-        "Sprinkler %":"Sprinkler Extent",
-        "Sprinkler Alarm Type":"Sprinkler Alarm Type",
-        "Sprinkler Wet/Dry":"Sprinkler Wet/Dry",
-        "Sprinkler Extent":"Sprinkler Extent",
-        "Physical Building #":"Physical Building #",
-        "Fire Alarm Type":"Fire Alarm Type",
-        "Burglar Alarm Type":"Burglar Alarm Type",
-        "Single Physical Building #":"Single Physical Building #",
-        "Full Street Address":"Full Street Address",
-        "Delete":"Full Street Address",
-        "Street 1":"Street 1"
+        "Loc  #": "Loc #",
+        "Location Street Address:": "Street 1",
+        "City": "City",
+        "State": "State",
+        "Zip Code": "Zip",
+        "Building Value": "Building Value",
+        "Content": "Business Personal Property",
+        "BI w/ EE": "Business Income",
+        "Total TIV": "TIV",
+        "# Apt  Units": "# Units",
+        "Building Occupancy": "Building Description",
+        "Construction": "Construction Type",
+        "# of Stories": "# Stories",
+        "Yr Built Gut/Reh": "Year Built",
+        "Total Building  Area": "Sq Ftg",
+        "Plumbing": "Plumbing Year",
+        "Heating": "Heating Year",
+        "Electrical": "Wiring Year",
+        "Roof": "Roofing Year",
+        "Sprinkler %": "Sprinkler Extent",
+        "Sprinkler Alarm Type": "Sprinkler Alarm Type",
+        "Sprinkler Wet/Dry": "Sprinkler Wet/Dry",
+        "Sprinkler Extent": "Sprinkler Extent",
+        "Physical Building #": "Physical Building #",
+        "Fire Alarm Type": "Fire Alarm Type",
+        "Burglar Alarm Type": "Burglar Alarm Type",
+        "Single Physical Building #": "Single Physical Building #",
+        "Full Street Address": "Full Street Address",
+        "Delete": "Full Street Address",
+        "Street 1": "Street 1"
     }
 
     rps = {
-        "Loc. #":"Loc #",
-        "Bldg.":"Bldg #",
-        "Address":"Street 1",
-        "City":"City",
-        "County":"County",
-        "ST":"State",
-        "Zip Code":"Zip",
-        "Building":"Building Value",
-        "Contents ":"Business Personal Property",
-        "Business Income (Incl EE)":"Business Income",
-        "Other":"Misc Real Property",
-        "Total":"TIV",
-        "# of Units":"# Units",
-        "Occupancy":"Building Description",
-        "ISO Construction Code":"Construction Type",
-        "Protection Class Code":"Prot Class",
-        "No. Stories":"# Stories",
-        "% Sprinkler":"Sprinkler Extent",
-        "Year Wiring Updated":"Wiring Year",
-        "Year Plumbing Updated":"Plumbing Year",
-        "Year Roof Replaced":"Roofing Year",
-        "Year Heating updated":"Heating Year",
-        "Basement":"# Basements",
-        "Sprinkler Alarm Type":"Sprinkler Alarm Type",
-        "Sprinkler Wet/Dry":"Sprinkler Wet/Dry",
-        "Sprinkler Extent":"Sprinkler Extent",
-        "Physical Building #":"Physical Building #",
-        "Single Physical Building #":"Single Physical Building #",
-        "Full Street Address":"Full Street Address",
-        "Delete":"Full Street Address",
-        "Street 1":"Street 1"
+        "Loc. #": "Loc #",
+        "Bldg.": "Bldg #",
+        "Address": "Street 1",
+        "City": "City",
+        "County": "County",
+        "ST": "State",
+        "Zip Code": "Zip",
+        "Building": "Building Value",
+        "Contents ": "Business Personal Property",
+        "Business Income (Incl EE)": "Business Income",
+        "Other": "Misc Real Property",
+        "Total": "TIV",
+        "# of Units": "# Units",
+        "Occupancy": "Building Description",
+        "ISO Construction Code": "Construction Type",
+        "Protection Class Code": "Prot Class",
+        "No. Stories": "# Stories",
+        "% Sprinkler": "Sprinkler Extent",
+        "Year Wiring Updated": "Wiring Year",
+        "Year Plumbing Updated": "Plumbing Year",
+        "Year Roof Replaced": "Roofing Year",
+        "Year Heating updated": "Heating Year",
+        "Basement": "# Basements",
+        "Sprinkler Alarm Type": "Sprinkler Alarm Type",
+        "Sprinkler Wet/Dry": "Sprinkler Wet/Dry",
+        "Sprinkler Extent": "Sprinkler Extent",
+        "Physical Building #": "Physical Building #",
+        "Single Physical Building #": "Single Physical Building #",
+        "Full Street Address": "Full Street Address",
+        "Delete": "Full Street Address",
+        "Street 1": "Street 1"
     }
     if amriscCell1.find(amriscID1) != -1 or amriscCell2.find(amriscID1) != -1 or amriscCell3.find(amriscID2) != -1:
-        minimum= min(headSubCombined, key=headSubCombined.get)-1
-        headerRow= headSubCombined[minimum]
-        sov_index={}
+        minimum = min(headSubCombined, key=headSubCombined.get) - 1
+        headerRow = headSubCombined[minimum]
+        sov_index = {}
         for itemIndex in range(len(headerRow)):
             if headerRow[itemIndex] in amrisc:
-                sov_index[itemIndex]= True
+                sov_index[itemIndex] = True
 
-        columnDict={}
+        columnDict = {}
         for index in sov_index:
-            column=[]
-            for key,item in headSubCombined.iteritems():
+            column = []
+            for key, item in headSubCombined.iteritems():
                 column.append(item[index])
-            columnDict[column[0]]=column
+            columnDict[column[0]] = column
 
         for key in columnDict:
             if amrisc[key] in work:
@@ -716,25 +758,26 @@ def setnwrite(headSubCombined, fileName):
 
         writer(final, work, workHeaderRow, amrisc, fileName)
     elif crcSwettCell.find(crcSwettID) != -1:
-        minimum= min(headSubCombined, key=headSubCombined.get)-1
-        headerRow= headSubCombined[minimum]
-        sov_index={}
+        minimum = min(headSubCombined, key=headSubCombined.get) - 1
+        headerRow = headSubCombined[minimum]
+        sov_index = {}
         for itemIndex in range(len(headerRow)):
             if headerRow[itemIndex] in crcSwett:
-                sov_index[itemIndex]= True
+                sov_index[itemIndex] = True
 
-        columnDict={}
+        columnDict = {}
         for index in sov_index:
-            column=[]
-            for key,item in headSubCombined.iteritems():
+            column = []
+            for key, item in headSubCombined.iteritems():
                 column.append(item[index])
-            columnDict[column[0]]=column
+            columnDict[column[0]] = column
 
         for key in columnDict:
             if crcSwett[key] in work:
                 final[crcSwett[key]].append(columnDict[key])
         final = adjustments(final)
         writer(final, work, workHeaderRow, crcSwett, fileName)
+
 
 def writer(final, workDict, workHeaderRow, template, sovFileName):
     """Actually writes our data to the spreadsheet and produces our finished product
@@ -764,7 +807,8 @@ def writer(final, workDict, workHeaderRow, template, sovFileName):
                     sheet.col(colIndex).width = colWidth
                     sheet.row(rowIndex).height = rowHeight
                 else:
-                    sheet.write(rowIndex, colIndex, valueArr[rowIndex], wordWrap)
+                    sheet.write(rowIndex, colIndex, valueArr[
+                                rowIndex], wordWrap)
                     sheet.col(colIndex).width = colWidth
                     sheet.row(rowIndex).height = rowHeight
 
