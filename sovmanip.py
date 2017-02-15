@@ -140,9 +140,6 @@ def adjustments(final):
     autoBldgNum(final)
     stripStreetNum(final, "Street 1")
 
-    if final["State"] == [] or isColEmpty(final['State']) == True:
-        statesConverter(final, "State")
-
     if final["Wiring Year"] == [] or isColEmpty(final['Wiring Year']) == True:
         wprhY(final, "Wiring Year")
     if final["Plumbing Year"] == [] or isColEmpty(final['Plumbing Year']) == True:
@@ -513,20 +510,6 @@ def wprhY(final, headerName):
         arr = final['Year Built'][:]
         final[headerName] = arr
 
-# Possibly defunct method since the workstation takes abbreviations and not full state names. Maybe the reverse will be useful?
-# Removing since I've implemented a similar thing in convertConstructionType()
-"""
-def statesConverter(final, headerName):
-     #Converts state abbreviation into full name
-     # TODO test this
-     # Amrisc SOV itself only accepts abbreviations, test on other templates
-
-    states={'mississippi': 'MS', 'oklahoma': 'OK', 'wyoming': 'WY', 'minnesota': 'MN', 'alaska': 'AK', 'arkansas': 'AR', 'new mexico': 'NM', 'indiana': 'IN', 'maryland': 'MD', 'louisiana': 'LA', 'texas': 'TX', 'tennessee': 'TN', 'iowa': 'IA', 'wisconsin': 'WI', 'arizona':'AZ', 'michigan': 'MI', 'kansas': 'KS', 'utah': 'UT', 'virginia': 'VA', 'oregon': 'OR', 'connecticut': 'CT', 'district of columbia': 'DC', 'new hampshire': 'NH', 'idaho': 'ID', 'west virginia': 'WV', 'south carolina': 'SC', 'california': 'CA', 'massachusetts': 'MA', 'vermont': 'VT', 'georgia': 'GA', 'north dakota': 'ND', 'pennsylvania': 'PA', 'puerto rico': 'PR', 'florida': 'FL', 'hawaii': 'HI', 'kentucky': 'KY', 'rhode island': 'RI', 'nebraska': 'NE', 'missouri': 'MO', 'ohio': 'OH', 'alabama': 'AL', 'illinois': 'IL', 'virgin islands': 'VI', 'south dakota': 'SD', 'colorado': 'CO', 'new jersey': 'NJ', 'washington':'WA', 'north carolina': 'NC', 'maine': 'ME', 'new york': 'NY', 'montana': 'MT','nevada': 'NV', 'delaware': 'DE'}
-    if headerName.lower().strip() in states:
-        final["State"]=states[headerName.lower().strip()]
-"""
-
-
 def isColEmpty(columnVals):
     """If there's no data in the column return True, if there is data return False
 
@@ -574,8 +557,52 @@ def setnwrite(headSubCombined, fileName):
     amriscID2 = "Starred * information is needed to process the account."
     crcSwettID = "LOCATION INFORMATION"
 
-    workHeaderRow = ['Loc #', 'Bldg #', 'Delete', 'Physical Building #', 'Single Physical Building #', 'Street 1', 'Street 2', 'City', 'State', 'Zip', 'County', 'Validated Zip', 'Building Value', 'Business Personal Property', 'Business Income', 'Misc Real Property', 'TIV', '# Units', 'Building Description', 'ClassCodeDesc', 'Construction Type',
-                     'Dist. To Fire Hydrant (Feet)', 'Dist. To Fire Station (Miles)', 'Prot Class', '# Stories', '# Basements', 'Year Built', 'Sq Ftg', 'Wiring Year', 'Plumbing Year', 'Roofing Year', 'Heating Year', 'Fire Alarm Type', 'Burglar Alarm Type', 'Sprinkler Alarm Type', 'Sprinkler Wet/Dry', 'Sprinkler Extent', 'Roof Covering', 'Roof Geometry', 'Roof Anchor', 'Cladding Type', 'Roof Sheathing Attachment', 'Frame-Foundation Connection', 'Residential Appurtenant Structures']
+    workHeaderRow = [
+        'Loc #',
+        'Bldg #',
+        'Delete',
+        'Physical Building #',
+        'Single Physical Building #',
+        'Street 1',
+        'Street 2',
+        'City',
+        'State',
+        'Zip',
+        'County',
+        'Validated Zip',
+        'Building Value',
+        'Business Personal Property',
+        'Business Income',
+        'Misc Real Property',
+        'TIV',
+        '# Units',
+        'Building Description',
+        'ClassCodeDesc',
+        'Construction Type',
+        'Dist. To Fire Hydrant (Feet)',
+        'Dist. To Fire Station (Miles)',
+        'Prot Class',
+        '# Stories',
+        '# Basements',
+        'Year Built',
+        'Sq Ftg',
+        'Wiring Year',
+        'Plumbing Year',
+        'Roofing Year',
+        'Heating Year',
+        'Fire Alarm Type',
+        'Burglar Alarm Type',
+        'Sprinkler Alarm Type',
+        'Sprinkler Wet/Dry',
+        'Sprinkler Extent',
+        'Roof Covering',
+        'Roof Geometry',
+        'Roof Anchor',
+        'Cladding Type',
+        'Roof Sheathing Attachment',
+        'Frame-Foundation Connection',
+        'Residential Appurtenant Structures'
+        ]
 
     final = {key: [] for key in workHeaderRow}
 
@@ -807,8 +834,7 @@ def writer(final, workDict, workHeaderRow, template, sovFileName):
                     sheet.col(colIndex).width = colWidth
                     sheet.row(rowIndex).height = rowHeight
                 else:
-                    sheet.write(rowIndex, colIndex, valueArr[
-                                rowIndex], wordWrap)
+                    sheet.write(rowIndex, colIndex, valueArr[rowIndex], wordWrap)
                     sheet.col(colIndex).width = colWidth
                     sheet.row(rowIndex).height = rowHeight
 

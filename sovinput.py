@@ -1,12 +1,14 @@
 import Tkinter
 import os
+import sys
 from xlrd import open_workbook
 from unidecode import unidecode
 from tkFileDialog import askopenfilename
 
 # Global variables
-userhome = os.path.expanduser('~/Desktop/') 
+userhome = os.path.expanduser('~/Desktop/')
 # Get the relative path of the current user, i.e. C:/Users/jmarkman/Desktop
+
 
 def ask():
     """opens the file explorer allowing user to choose SOV to parse
@@ -24,6 +26,7 @@ def ask():
     sovFile = [sov]
     return sovFile
 
+
 def findSheetName(files):
     """find the sheet with the SOV through hierarchy guessing
 
@@ -35,30 +38,35 @@ def findSheetName(files):
     sheet in the workbook. It returns the sheet that meets one of these conditions.
     """
     for item in files:
-        wb = open_workbook(item)
         try:
-            sheet1 = wb.sheet_by_name("SOV")
-        except:
+            wb = open_workbook(item)
             try:
-                sheet1 = wb.sheet_by_name("SOV-APP")
+                sheet1 = wb.sheet_by_name("SOV")
             except:
                 try:
-                    sheet1 = wb.sheet_by_name("AmRisc SOV")
+                    sheet1 = wb.sheet_by_name("SOV-APP")
                 except:
                     try:
-                        sheet1 = wb.sheet_by_name("BREAKDOWN")
+                        sheet1 = wb.sheet_by_name("AmRisc SOV")
                     except:
                         try:
-                            sheet1 = wb.sheet_by_name("Property Schedule")
+                            sheet1 = wb.sheet_by_name("BREAKDOWN")
                         except:
                             try:
-                                sheet1 = wb.sheet_by_name("2015 Schedule")
+                                sheet1 = wb.sheet_by_name("Property Schedule")
                             except:
                                 try:
-                                    sheet1 = wb.sheet_by_name("Sheet1")
+                                    sheet1 = wb.sheet_by_name("2015 Schedule")
                                 except:
-                                    sheet1 = wb.sheet_by_index(0)
+                                    try:
+                                        sheet1 = wb.sheet_by_name("Sheet1")
+                                    except:
+                                        sheet1 = wb.sheet_by_index(0)
+        except IOError:
+            print "Closing!"
+            sys.exit(0)
         return sheet1
+
 
 def loopAllRows(sheet):
     """Loops through all rows in the current sheet, formats the data
@@ -80,6 +88,7 @@ def loopAllRows(sheet):
             totalPureData[i] = rowPureData
         i += 1
     return totalPureData
+
 
 def identifyHeaderRow(numValsDict, comparisonDic):
     """Identifies the header row
