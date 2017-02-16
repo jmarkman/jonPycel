@@ -103,7 +103,7 @@ def identifyHeaderRow(numValsDict, comparisonDic):
         row = numValsDict[rowNumber]
         matchCounter = 0
         for value in row:
-            if isinstance(value) == unicode:
+            if isinstance(value, unicode) == unicode:
                 value = unidecode(value)
             value = str(value).lower()
 

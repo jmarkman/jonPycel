@@ -257,30 +257,36 @@ def stripStreetNum(final, street1):
     # strips off the number from the street if it is there
 
     street1 = final[street1][0]
-    for index in range(len(street1)):
-        space = street1[index].find(' ')
-        posNumber = street1[index][:space]
-        if street1[index][0].isdigit():
-            try:
-                posNumber = posNumber.replace('-', '')
-                street1[index] = street1[index][space:].strip()
-            except:
-                pass
-        else:
-            pass
-    street1[0] = "Street 1"
+    with open('E:\Work\Pycel\jonPycel\output\strippedStreet.txt', 'w') as st:
+        for index in range(len(street1)):
+            space = street1[index].find(' ')
+            posNumber = street1[index][:space]
+            if len(posNumber) > 0:
+                st.write(posNumber + "\n")
+            
+            if len(posNumber) > 0:
+                if posNumber[0].isdigit():
+                    try:
+                        posNumber = posNumber.replace('-', '')
+                        street1[index] = street1[index][space:].strip()
+                    except:
+                        pass
+                else:
+                    pass
+            street1[0] = "Street 1"
 
 
-# def stripStreet2(final):
-#     source = final["Street 1"][0]
+def stripStreet2(final):
+    source = final["Street 1"][0]
 
 
-# def checkIfValidStreet2(addrList):
-#     variations = ["suite", "ste", "bldg", "bld", '#']
-#     for item in addrList:
-#         address = addrList[item].tolower()
-#         for x in variations:
-#             if x in address.split():
+def checkIfValidStreet2(addrList):
+    variations = ["suite", "ste", "bldg", "bld", '#']
+    for item in addrList:
+        address = addrList[item].tolower()
+        for x in variations:
+            if x in address.split():
+                return True
 
 def physicalBuildingNum(final, caption):
     """Takes the street numbers from the address contained within (for AmRisc) "*Street Address",
@@ -312,7 +318,7 @@ def physicalBuildingNum(final, caption):
                     elif caption == "Physical Building #":
                         numTracker.append(int(num))
                     else:
-                        numTracker.append(int(num1))
+                        numTracker.append(int(num))
                 except ValueError:
                     pass
             final[caption] = [numTracker]
@@ -838,6 +844,7 @@ def writer(final, workDict, workHeaderRow, template, sovFileName):
                     sheet.col(colIndex).width = colWidth
                     sheet.row(rowIndex).height = rowHeight
 
+    # TODO: Try/catch for IOError if SoV is re-run but results are still open
     sovCheck = os.path.isfile(sovFileName[0])
     if sovCheck == False:
         workbook.save(sovFileName[0])
