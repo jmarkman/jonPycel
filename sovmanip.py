@@ -139,6 +139,7 @@ def adjustments(final):
     autoLocNum(final)
     autoBldgNum(final)
     stripStreetNum(final, "Street 1")
+    # stripStreet2(final)
 
     if final["Wiring Year"] == [] or isColEmpty(final['Wiring Year']) == True:
         wprhY(final, "Wiring Year")
@@ -276,17 +277,18 @@ def stripStreetNum(final, street1):
             street1[0] = "Street 1"
 
 
-def stripStreet2(final):
-    source = final["Street 1"][0]
+# def stripStreet2(final):
+#     source = final["Street 1"][0]
+#     variations = ["suite", "Suite", "ste", "Ste", "bldg", "Bldg", "bld", "Bld" '#']
+#     st2List = ["Street 2"]
+#     street2List = final["Street 2"].append(st2List)
+#     street2 = final["Street 2"][0]
+#     for item in street2:
+#         workingStreet = street2[item].split()
+#         for x in variations:
+#             if x in workingStreet:
+#                 street2.append
 
-
-def checkIfValidStreet2(addrList):
-    variations = ["suite", "ste", "bldg", "bld", '#']
-    for item in addrList:
-        address = addrList[item].tolower()
-        for x in variations:
-            if x in address.split():
-                return True
 
 def physicalBuildingNum(final, caption):
     """Takes the street numbers from the address contained within (for AmRisc) "*Street Address",
@@ -304,25 +306,32 @@ def physicalBuildingNum(final, caption):
             if len(val) > 0:
                 space = val.find(" ")
                 dash = val.find("-")
-                if dash > 0:
-                    holder = val[:space]
-                    num1 = holder[:dash]
-                    num2 = holder[dash + 1:]
-                else:
+                streetNum = val[:space]
+                if dash != -1:
+                    num = val[:dash]
+                    if not num.isdecimal():
+                        num = ""
+                elif dash == -1:
                     num = val[:space]
+                    if not num.isdecimal():
+                        num = ""
                 try:
                     if caption == "Single Physical Building #" and dash != -1:
-                        numTracker.append(int(num2))
+                        numTracker.append(num)
                     elif caption == "Single Physical Building #":
-                        numTracker.append(int(num))
+                        numTracker.append(num)
                     elif caption == "Physical Building #":
-                        numTracker.append(int(num))
+                        if streetNum[0].isdigit():
+                            numTracker.append(streetNum)
+                        else:
+                            numTracker.append("")
                     else:
-                        numTracker.append(int(num))
+                        numTracker.append("")
                 except ValueError:
                     pass
             final[caption] = [numTracker]
-    except:
+    except Exception as ex:
+        print ex
         pass
 
 
