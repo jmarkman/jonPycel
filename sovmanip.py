@@ -1,7 +1,6 @@
 import os
 import sys
 import xlwt
-import logging
 import subprocess
 from xlrd import open_workbook
 from unidecode import unidecode
@@ -139,7 +138,6 @@ def adjustments(final):
     autoLocNum(final)
     autoBldgNum(final)
     stripStreetNum(final, "Street 1")
-    # stripStreet2(final)
 
     if final["Wiring Year"] == [] or isColEmpty(final['Wiring Year']) == True:
         wprhY(final, "Wiring Year")
@@ -159,6 +157,7 @@ def adjustments(final):
     sprinkExtent(final)
     convertBasements(final)
     convertConstructionType(final)
+    stripStreet2(final)
     populationCounter(final, 'State')
 
     return final
@@ -258,36 +257,39 @@ def stripStreetNum(final, street1):
     # strips off the number from the street if it is there
 
     street1 = final[street1][0]
-    with open('E:\Work\Pycel\jonPycel\output\strippedStreet.txt', 'w') as st:
-        for index in range(len(street1)):
-            space = street1[index].find(' ')
-            posNumber = street1[index][:space]
-            if len(posNumber) > 0:
-                st.write(posNumber + "\n")
-            
-            if len(posNumber) > 0:
-                if posNumber[0].isdigit():
-                    try:
-                        posNumber = posNumber.replace('-', '')
-                        street1[index] = street1[index][space:].strip()
-                    except:
-                        pass
-                else:
+    for index in range(len(street1)):
+        space = street1[index].find(' ')
+        posNumber = street1[index][:space]
+
+        if len(posNumber) > 0:
+            if posNumber[0].isdigit():
+                try:
+                    posNumber = posNumber.replace('-', '')
+                    street1[index] = street1[index][space:].strip()
+                except:
                     pass
-            street1[0] = "Street 1"
+            else:
+                pass
+        street1[0] = "Street 1"
 
 
 # def stripStreet2(final):
-#     source = final["Street 1"][0]
-#     variations = ["suite", "Suite", "ste", "Ste", "bldg", "Bldg", "bld", "Bld" '#']
-#     st2List = ["Street 2"]
-#     street2List = final["Street 2"].append(st2List)
+#     st2List = final["Street 1"][0][:]
+#     variations = ["blg", "Blg", "suite", "Suite", "ste", "Ste", "bldg", "Bldg", "bld", "Bld", '#']
+#     del st2List[0]
+#     st2List.insert(0, "strt2")
+#     final["Street 2"].append(st2List)
 #     street2 = final["Street 2"][0]
-#     for item in street2:
-#         workingStreet = street2[item].split()
-#         for x in variations:
-#             if x in workingStreet:
-#                 street2.append
+#     print "it begins"
+#     try:
+#         for listIndex, address in enumerate(street2):
+#             for var in variations:
+#                 if any(var in address for var in variations):
+#                     varLocation = address.find(var)
+#                     street2[listIndex] = address[varLocation:]
+#                     print street2[listIndex]
+#     except Exception as e:
+#         print e
 
 
 def physicalBuildingNum(final, caption):
@@ -705,6 +707,7 @@ def setnwrite(headSubCombined, fileName):
         "Construction Description ": "Construction Type",
         "Construction Description (provide further details on construction features)": "Construction Type",
         "ISO Prot Class": "Prot Class",
+        "strt2":"Street 2",
         "*# of Units": "# Units",
         "Fire Alarm Type": "Fire Alarm Type",
         "Burglar Alarm Type": "Burglar Alarm Type",
@@ -730,6 +733,7 @@ def setnwrite(headSubCombined, fileName):
         "Total Building  Area": "Sq Ftg",
         "Plumbing": "Plumbing Year",
         "Heating": "Heating Year",
+        "strt2":"Street 2",
         "Electrical": "Wiring Year",
         "Roof": "Roofing Year",
         "Sprinkler %": "Sprinkler Extent",
@@ -776,6 +780,7 @@ def setnwrite(headSubCombined, fileName):
         "Single Physical Building #": "Single Physical Building #",
         "Full Street Address": "Full Street Address",
         "Delete": "Full Street Address",
+        "strt2":"Street 2",
         "Street 1": "Street 1"
     }
     if amriscCell1.find(amriscID1) != -1 or amriscCell2.find(amriscID1) != -1 or amriscCell3.find(amriscID2) != -1:
