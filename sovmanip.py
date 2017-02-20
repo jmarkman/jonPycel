@@ -157,7 +157,7 @@ def adjustments(final):
     sprinkExtent(final)
     convertBasements(final)
     convertConstructionType(final)
-    stripStreet2(final)
+    # stripStreet2(final)
     populationCounter(final, 'State')
 
     return final
@@ -274,22 +274,27 @@ def stripStreetNum(final, street1):
 
 
 # def stripStreet2(final):
-#     st2List = final["Street 1"][0][:]
-#     variations = ["blg", "Blg", "suite", "Suite", "ste", "Ste", "bldg", "Bldg", "bld", "Bld", '#']
-#     del st2List[0]
-#     st2List.insert(0, "strt2")
-#     final["Street 2"].append(st2List)
-#     street2 = final["Street 2"][0]
-#     print "it begins"
+#     st1Arr = final["Street 1"][0]
+#     st2Arr = final["Street 1"][0][:]
+#     st2Arr.pop(0)
+#     tempStreet2 = ["strt2"]
+#     variations = ["blg", "suite", "suites", "ste", "bldg", "bld", '#']
 #     try:
-#         for listIndex, address in enumerate(street2):
+#         for place, address in enumerate(st2Arr):
 #             for var in variations:
-#                 if any(var in address for var in variations):
-#                     varLocation = address.find(var)
-#                     street2[listIndex] = address[varLocation:]
-#                     print street2[listIndex]
+#                 if address.lower().find(var) != -1:
+#                     idx = address.lower().find(var.lower())
+#                     substringStreet2 = address[idx:]
+#                     st1Arr[place] = address[:idx]
+#                     if substringStreet2 in tempStreet2:
+#                         tempStreet2.append("")
+#                     else:
+#                         tempStreet2.append(substringStreet2)
+#                 # else:
+#                 #     tempStreet2.append("")
 #     except Exception as e:
 #         print e
+#     final["Street 2"] = [tempStreet2]
 
 
 def physicalBuildingNum(final, caption):
