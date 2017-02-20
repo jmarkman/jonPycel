@@ -484,8 +484,7 @@ def convertConstructionType(final):
     for index, item in enumerate(sovConstTypes):
         for key in constTypeDictionary:
             if sovConstTypes[index].lower().strip() in constTypeDictionary.iterkeys():
-                sovConstTypes[index] = constTypeDictionary[
-                    item.lower().strip()]
+                sovConstTypes[index] = constTypeDictionary[item.lower().strip()]
 
 
 def populationCounter(final, caption):

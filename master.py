@@ -1,5 +1,6 @@
-import sovinput as input
+import sovinput
 import sovmanip as modify
+import pycelexport as exportToDB
 import os
 # TODO: import export <-- rename this
 
@@ -278,10 +279,10 @@ comparisonDic = {
 clear = lambda: os.system('cls')
 clear()
 
-input_sov = input.ask()
-sov_sheet = input.findSheetName(input_sov)
-sov_data = input.loopAllRows(sov_sheet)
-header_row = input.identifyHeaderRow(sov_data, comparisonDic)
+input_sov = sovinput.ask()
+sov_sheet = sovinput.findSheetName(input_sov)
+sov_data = sovinput.loopAllRows(sov_sheet)
+header_row = sovinput.identifyHeaderRow(sov_data, comparisonDic)
 
 header_row = modify.head_matcher(
     modify.comp_converter(comparisonDic), header_row, input_sov)
@@ -289,4 +290,4 @@ sub_header_data = modify.sliceSubHeaderData(header_row, sov_sheet)
 head_sub_combine = modify.combine(header_row, sub_header_data)
 modify.setnwrite(head_sub_combine, input_sov)
 
-# TODO: Export is going to have to live here
+exportToDB.run()

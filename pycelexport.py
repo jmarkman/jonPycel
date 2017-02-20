@@ -12,9 +12,6 @@ This program is only for exporting the data received from the pycel converter
 
 It take in a pycel converted file, ask for the control number, 
 and write the data to a database
-
-
-
 """
 
 

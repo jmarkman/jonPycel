@@ -63,7 +63,7 @@ def findSheetName(files):
                                     except:
                                         sheet1 = wb.sheet_by_index(0)
         except IOError:
-            print "Closing!"
+            # print "Closing!"
             sys.exit(0)
         return sheet1
 
