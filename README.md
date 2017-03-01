@@ -17,3 +17,6 @@ My workplace modifications to [Greg Schultz's](https://github.com/gschultz49) Py
 * Implement try/catch for if the user runs a SoV through PyCel, and then runs that same SoV through it again without closing the results that are already open
 * Review the template switching since it works on a try/catch and resuses the same block of code: this can 100% be made better but time will not allow for it for first release
 * Implement Street 2 extraction - this will be a very large undertaking as it requires further rewriting of several functions for everything to work
+
+# Worries
+My biggest worry is that depending on the number and scale of feature requests, this is no longer going to be just a Python script. At some point, it's going to have to make the jump to full-fledged program so at the very least, the program makes sense from an outsider's perspective.

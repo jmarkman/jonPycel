@@ -71,19 +71,6 @@ def findFileName(absPath):
     name = absPath[slash + 1:dot]
     return name
 
-
-def getFileExtension(file):
-    """Extracts the file extension from the given file. Somewhat necessary(?) for
-    .xlsx / .xls inconsistencies.
-
-    Parameter: Absolute path to the file
-    Returns: File extension, i.e., .xlsx
-    """
-    dot = file.rfind('.')
-    extension = file[dot:]
-    return extension
-
-
 def comp_converter(comparisonDic):
     """Removes unwanted characters from dictionary, see decompress
     """
@@ -241,11 +228,11 @@ def writeRawStreet(final):
     attempts to rename the column itself.
     """
     try:
-        delCol = final["Delete"]
+        delCol = final["Full Street Address"]
         fullAddr = ["Full Street Address"]
         delCol.append(fullAddr)
         street1 = final["Street 1"][0]
-        fullStreetAddr = final["Delete"][0]
+        fullStreetAddr = final["Full Street Address"][0]
         for street in range(1, len(street1)):
             st = street1[street]
             fullStreetAddr.append(st)
@@ -355,7 +342,7 @@ def autoLocNum(final):
     """Adjusts the "Loc #" column to be "1" if all the addresses in "Full Street Address" are
     the same.
     """
-    rawStreets = final["Delete"][0]
+    rawStreets = final["Full Street Address"][0]
     cleanRawStreets = [x for x in rawStreets if x != ""]
     cleanRawStreets.remove("Full Street Address")
     dupesBool = checkIfSame(cleanRawStreets)
@@ -371,7 +358,7 @@ def autoBldgNum(final):
     """Adjusts the building numbers to count off in ascending order if all the addresses in
     "Full Street Address" are the same.
     """
-    rawStreets = final["Delete"][0]
+    rawStreets = final["Full Street Address"][0]
     cleanRawStreets = [x for x in rawStreets if x != ""]
     cleanRawStreets.remove("Full Street Address")
     dupesBool = checkIfSame(cleanRawStreets)
@@ -581,7 +568,7 @@ def setnwrite(headSubCombined, fileName):
     workHeaderRow = [
         'Loc #',
         'Bldg #',
-        'Delete',
+        'Full Street Address',
         'Physical Building #',
         'Single Physical Building #',
         'Street 1',
@@ -590,18 +577,14 @@ def setnwrite(headSubCombined, fileName):
         'State',
         'Zip',
         'County',
-        'Validated Zip',
         'Building Value',
         'Business Personal Property',
         'Business Income',
         'Misc Real Property',
-        'TIV',
         '# Units',
         'Building Description',
         'ClassCodeDesc',
         'Construction Type',
-        'Dist. To Fire Hydrant (Feet)',
-        'Dist. To Fire Station (Miles)',
         'Prot Class',
         '# Stories',
         '# Basements',
@@ -630,7 +613,7 @@ def setnwrite(headSubCombined, fileName):
     work = {
         'Loc #': 0,
         'Bldg #': 1,
-        'Delete': 2,
+        'Full Street Address': 2,
         'Physical Building #': 3,
         'Single Physical Building #': 4,
         'Street 1': 5,
@@ -639,39 +622,35 @@ def setnwrite(headSubCombined, fileName):
         'State': 8,
         'Zip': 9,
         'County': 10,
-        'Validated Zip': 11,
-        'Building Value': 12,
-        'Business Personal Property': 13,
-        'Business Income': 14,
-        'Misc Real Property': 15,
-        'TIV': 16,
-        '# Units': 17,
-        'Building Description': 18,
-        'ClassCodeDesc': 19,
-        'Construction Type': 20,
-        'Dist. To Fire Hydrant (Feet)': 21,
-        'Dist. To Fire Station (Miles)': 22,
-        'Prot Class': 23,
-        '# Stories': 24,
-        '# Basements': 25,
-        'Year Built': 26,
-        'Sq Ftg': 27,
-        'Wiring Year': 28,
-        'Plumbing Year': 29,
-        'Roofing Year': 30,
-        'Heating Year': 31,
-        'Fire Alarm Type': 32,
-        'Burglar Alarm Type': 33,
-        'Sprinkler Alarm Type': 34,
-        'Sprinkler Wet/Dry': 35,
-        'Sprinkler Extent': 36,
-        'Roof Covering': 37,
-        'Roof Geometry': 38,
-        'Roof Anchor': 39,
-        'Cladding Type': 40,
-        'Roof Sheathing Attachment': 41,
-        'Frame-Foundation Connection': 42,
-        'Residential Appurtenant Structures': 43
+        'Building Value': 11,
+        'Business Personal Property': 12,
+        'Business Income': 13,
+        'Misc Real Property': 14,
+        '# Units': 15,
+        'Building Description': 16,
+        'ClassCodeDesc': 17,
+        'Construction Type': 18,
+        'Prot Class': 19,
+        '# Stories': 20,
+        '# Basements': 21,
+        'Year Built': 22,
+        'Sq Ftg': 23,
+        'Wiring Year': 24,
+        'Plumbing Year': 25,
+        'Roofing Year': 26,
+        'Heating Year': 27,
+        'Fire Alarm Type': 28,
+        'Burglar Alarm Type': 29,
+        'Sprinkler Alarm Type': 30,
+        'Sprinkler Wet/Dry': 31,
+        'Sprinkler Extent': 32,
+        'Roof Covering': 33,
+        'Roof Geometry': 34,
+        'Roof Anchor': 35,
+        'Cladding Type': 36,
+        'Roof Sheathing Attachment': 37,
+        'Frame-Foundation Connection': 38,
+        'Residential Appurtenant Structures': 39
     }
 
     amrisc = {
@@ -686,7 +665,6 @@ def setnwrite(headSubCombined, fileName):
         "Fire Alarm Type": "Fire Alarm Type",
         "Burglar Alarm Type": "Burglar Alarm Type",
         "Full Street Address": "Full Street Address",
-        "Delete": "Full Street Address",
         "*Year Roof covering last fully replaced": "Roofing Year",
         "* Bldg No.": "Loc #",
         "Bldg": "Bldg #",
@@ -749,7 +727,6 @@ def setnwrite(headSubCombined, fileName):
         "Burglar Alarm Type": "Burglar Alarm Type",
         "Single Physical Building #": "Single Physical Building #",
         "Full Street Address": "Full Street Address",
-        "Delete": "Full Street Address",
         "Street 1": "Street 1"
     }
 
@@ -783,7 +760,6 @@ def setnwrite(headSubCombined, fileName):
         "Physical Building #": "Physical Building #",
         "Single Physical Building #": "Single Physical Building #",
         "Full Street Address": "Full Street Address",
-        "Delete": "Full Street Address",
         "strt2":"Street 2",
         "Street 1": "Street 1"
     }
@@ -872,7 +848,7 @@ def writer(final, workDict, workHeaderRow, template, sovFileName):
     else:
         sovName = findFileName(sovFileName[0])
         precedingName = '[Pycel_Extracted]_'
-        fileType = getFileExtension(sovFileName[0])
+        fileType = '.xls'
         newFileName = precedingName + sovName + fileType
         workbook.save(userhome + newFileName)
         print "FILE WRITTEN"

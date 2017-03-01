@@ -26,7 +26,6 @@ def ask():
     sovFile = [sov]
     return sovFile
 
-
 def findSheetName(files):
     """find the sheet with the SOV through hierarchy guessing
 
