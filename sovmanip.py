@@ -5,6 +5,7 @@ import subprocess
 from xlrd import open_workbook
 from unidecode import unidecode
 import sovinput as pycelInput
+import pycelexport
 
 # Global variables
 # Get the relative path of the current user
@@ -551,6 +552,7 @@ def setnwrite(headSubCombined, fileName):
     """
 
     # Get instance of workbook and sheet
+    print fileName[0]
     workbook = open_workbook(fileName[0])
     sheet = workbook.sheet_by_index(0)
     # Declare hardcoded locations on the sheet that signify what kind of sheet
@@ -803,6 +805,7 @@ def setnwrite(headSubCombined, fileName):
             if crcSwett[key] in work:
                 final[crcSwett[key]].append(columnDict[key])
         final = adjustments(final)
+        
         writer(final, work, workHeaderRow, crcSwett, fileName)
 
 
@@ -854,3 +857,4 @@ def writer(final, workDict, workHeaderRow, template, sovFileName):
         print "FILE WRITTEN"
         os.startfile(userhome + newFileName)
         print "FILE NOW OPEN"
+        pycelexport.run(userhome + newFileName)

@@ -14,29 +14,15 @@ It take in a pycel converted file, ask for the control number,
 and write the data to a database
 """
 
-
-def ask():
-	"""opens the file explorer allowing user to choose pycel converted SOV to parse"""
-
-	root=Tkinter.Tk()
-	root.withdraw()
-	userhome = os.path.expanduser('~')
-	desktop = userhome + '/Desktop/'
-	file = askopenfilename(initialdir=desktop)
-	# file = askopenfilename(initialdir="C:\Users\gregory.schultz\Desktop\pycel_1_6_17\examples")
-	file=[file]
-	print "FILE NAME: " +file[0]
-	return file
-
 def openPromptValidate(caption, description):
 	"""Prompts and validates control number from the user
 	
 	Parameter caption: appears as window name
 	Parameter description: text that appears above input box """
 
-	val=tkSimpleDialog.askstring(caption,description)
+	val = tkSimpleDialog.askstring(caption,description)
 	# value can only be a number with min length 6 and max length 7
-	val=re.search(r"^\d{6,7}$", val)
+	val = re.search(r"^\d{6,7}$", val)
 	# if val passes the appropriate regex... (is a match object)
 	if val!=None:
 		# val is a match object, this is how you access the data
@@ -44,7 +30,7 @@ def openPromptValidate(caption, description):
 		return final
 	# val is None if no match, bad user input, recurse until correct
 	else:
-		final=openPromptValidate(caption,"Err! Enter only 6 or 7 digits!")
+		final=openPromptValidate(caption,"Not a valid control number. Check your input and try again.")
 	return final
 
 def getControlNumber():
@@ -59,11 +45,7 @@ def insertStatement(cnxn,row):
 	# print row.distFireStation
 	cursor = cnxn.cursor()
 
-
-	# TODOS: For some reason the DistToFireStation is failing to input because of the numeric input, find out why
-    # 		 Figure out how to put in the keys correctly, throwing an err
-	cursor.execute("INSERT INTO pycelSOV (ControlNoIMS, SOVID, LocationNo, BuildingNo, PhysicalBldgNum, SinglePhysicalBldgNum, Address1, Address2, City, State, Zip, County, BuildingValue, BusinessPersonalProperty, BusinessIncome, MiscRealProperty, TIV, Units, BuildingDescription, ClassCodeDesc,  ConstructionType,  DistToFireHydrant, DistToFireStation, ProtectionCode, Stories, Basements, YearBuilt, SqFootage, WiringYear, PlumbingYear, RoofingYear, HeatingYear, FireAlarmType, BurglarAlarmType, SprinklerAlarmType, SprinklerWetDry, SprinklerExtent)VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(row.CONTROLNUMBER, 1, row.locNum, row.bldgNum, row.physicalBuild, row.singlePhysical, row.street1, row.street2, row.city, row.state, row.zipCode, row.county, row.buildVal, row.busPers, row.busIncome, row.miscReal, row.TIV, row.numUnits, row.buildDescrip, row.classCodeDesc, row.constType,  row.distFireHydrant, 1111 , row.protClass, row.numStories, row.numBasement, row.yearBuilt, row.sqFtg, row.wireY, row.plumbY, row.roofY, row.heatY, row.fireAlarmType, row.burgAlarmType, row.sprinklerAlarmType, row.sprinklerWetDry, row.sprinklerExtent))	
-	# cursor.execute("INSERT INTO pycelSOV (ControlNoIMS, SOVID, LocationNo, BuildingNo, PhysicalBldgNum, SinglePhysicalBldgNum, Address1, Address2, City, State, Zip, County, BuildingValue, BusinessPersonalProperty, BusinessIncome, MiscRealProperty, TIV, Units, BuildingDescription, ClassCodeDesc,  ConstructionType,  DistToFireHydrant, DistToFireStation, ProtectionCode, Stories, Basements, YearBuilt, SqFootage, WiringYear, PlumbingYear, RoofingYear, HeatingYear, FireAlarmType, BurglarAlarmType, SprinklerAlarmType, SprinklerWetDry, SprinklerExtent)VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(row.CONTROLNUMBER, 1, row.locNum, row.bldgNum, row.physicalBuild, row.singlePhysical, row.street1, row.street2, row.city, row.state, row.zipCode, row.county, row.buildVal, row.busPers, row.busIncome, row.miscReal, row.TIV, row.numUnits, row.buildDescrip, row.classCodeDesc, row.constType,  row.distFireHydrant, row.distFireStation , row.protClass, row.numStories, row.numBasement, row.yearBuilt, row.sqFtg, row.wireY, row.plumbY, row.roofY, row.heatY, row.fireAlarmType, row.burgAlarmType, row.sprinklerAlarmType, row.sprinklerWetDry, row.sprinklerExtent))	
+	cursor.execute("INSERT INTO pycelSOV (ControlNoIMS, LocationNo, BuildingNo, StreetAddressRaw, PhysicalBldgNum, SinglePhysicalBldgNum, Address1, Address2, City, State, Zip, County, BuildingValue, BusinessPersonalProperty, BusinessIncome, MiscRealProperty, Units, BuildingDescription, ClassCodeDescRaw, ConstructionTypeRaw, ProtectionCode, Stories, Basements, YearBuilt, SqFootage, WiringYear, PlumbingYear, RoofingYear, HeatingYear, FireAlarmTypeRaw, BurglarAlarmTypeRaw, SprinklerAlarmTypeRaw, SprinklerWetDryRaw, SprinklerExtentRaw) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (row.CONTROLNUMBER, row.locNum, row.bldgNum, row.rawAddr, row.physicalBuild, row.singlePhysical, row.street1, row.street2,  row.city, row.state, row.zipCode, row.county, row.buildVal, row.busPers, row.busIncome, row.miscReal, row.numUnits, row.buildDescrip, row.classCodeDesc, row.constType, row.protClass, row.numStories, row.numBasement, row.yearBuilt, row.sqFtg, row.wireY, row.plumbY, row.roofY, row.heatY, row.fireAlarmType, row.burgAlarmType, row.sprinklerAlarmType, row.sprinklerWetDry, row.sprinklerExtent))
 	# need this commit statement or else nothing goes through, ACID principle
 	cnxn.commit()
 	print "Statement executed and committed"
@@ -74,7 +56,7 @@ def commitToDatabase(records):
 	
 	Parameter records: array of Record objects"""
 	try:
-		cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=10.10.11.112;DATABASE=HermesLocationsBuildTest;UID=svc-flexicap;PWD=svcflex')
+		cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=10.10.11.112;DATABASE=ABBYY_AppData;UID=svc-flexicap;PWD=svcflex')
 		# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=10.10.11.112;DATABASE=HermesLocationsBuildTest;UID=svc-flexicap;PWD=svcflex')
 		print "Connection established"
 	except:
@@ -95,33 +77,26 @@ def commitToDatabase(records):
 
 class Record(object):
 	"""" represents each row as an object where each attribute corresponds to a column from the workstation"""
-	def __init__(self, locNum, bldgNum, delete,physicalBuild, singlePhysical, street1, street2, city, state, zipCode, county, valZip, buildVal, busPers,
-		busIncome, miscReal, TIV, numUnits, buildDescrip, classCodeDesc, constType, distFireHydrant,distFireStation, protClass,numStories,
-		numBasement, yearBuilt, sqFtg, wireY,plumbY,roofY,heatY, fireAlarmType, burgAlarmType, sprinklerAlarmType, sprinklerWetDry, 
-		sprinklerExtent, roofCovering, roofGeo, roofAnchor, cladType, roofSheath, frameConnection, resAppurtenant):
+	def __init__(self, locNum, bldgNum, rawAddr, physicalBuild, singlePhysical, street1, street2, city, state, zipCode, county, buildVal, busPers, busIncome, miscReal, numUnits, buildDescrip, classCodeDesc, constType, protClass,numStories, numBasement, yearBuilt, sqFtg, wireY,plumbY,roofY,heatY, fireAlarmType, burgAlarmType, sprinklerAlarmType, sprinklerWetDry, sprinklerExtent, roofCovering, roofGeo, roofAnchor, cladType, roofSheath, frameConnection, resAppurtenant):
 		self.locNum = locNum
 		self.bldgNum = bldgNum
-		self.delete = delete
-		self.physicalBuild=physicalBuild
-		self.singlePhysical =singlePhysical
+		self.rawAddr = rawAddr
+		self.physicalBuild = physicalBuild
+		self.singlePhysical = singlePhysical
 		self.street1 = street1
 		self.street2 = street2
 		self.city = city
 		self.state = state
 		self.zipCode = zipCode
 		self.county = county
-		self.valZip = valZip 
 		self.buildVal = buildVal
 		self.busPers = busPers
 		self.busIncome = busIncome
 		self.miscReal = miscReal
-		self.TIV = TIV
 		self.numUnits = numUnits
 		self.buildDescrip = buildDescrip
 		self.classCodeDesc = classCodeDesc
 		self.constType = constType
-		self.distFireHydrant = distFireHydrant
-		self.distFireStation = distFireStation
 		self.protClass = protClass
 		self.numStories = numStories
 		self.numBasement = numBasement
@@ -144,13 +119,13 @@ class Record(object):
 		self.frameConnection = frameConnection
 		self.resAppurtenant = resAppurtenant
 		# to be inputted by user
-		self.CONTROLNUMBER =None
+		self.CONTROLNUMBER = None
 
 	def __str__(self):
 		return("Record object:\n"
                "  Loc #  = {0}\n"
                "  Building # = {1}\n"
-               "  Delete = {2}\n"
+               "  Raw Address = {2}\n"
                "  Physical Building # = {3}\n"
                "  Single Physical Building # = {4}\n"
                "  Street 1 = {5}\n"
@@ -159,44 +134,40 @@ class Record(object):
                "  State = {8}\n"
                "  Zip = {9}\n"
                "  County = {10}\n"
-               "  Validated Zip = {11}\n"
-               "  Business Value = {12}\n"
-               "  Business Personal Property = {13}\n"
-               "  Business Income 	= {14}\n"
-               "  Misc Real Property = {15}\n"
-               "  TIV	= {16}\n"
-               "  # of Units = {17}\n"
-               "  Building Description = {18}\n"
-               "  ClassCodeDesc = {19}\n"
-               "  Construction Type = {20}\n"
-               "  Dist. to Fire Hydrant (feet) = {21}\n"
-               "  Dist. to Fire Station (miles) = {22}\n"
-               "  Prot Class = {23}\n"
-               "  # of Stories = {24}\n"
-               "  # of Basements = {25}\n"
-               "  Year Built = {26}\n"
-               "  Sq Ftg = {27}\n"
-               "  Wiring Year = {28}\n"
-               "  Plumbing Year = {29}\n"
-               "  Roofing Year = {30}\n"
-               "  Heating Year = {31}\n"
-               "  Fire Alarm Type = {32}\n"
-               "  Burglar Alarm Type = {33}\n"
-               "  Sprinkler Alarm Type 	= {34}\n"
-               "  Sprinkler Wet/Dry = {35}\n"
-               "  Sprinkler Extent 	= {36}\n"
-               "  Roof Covering = {37}\n"
-               "  Roof Geometry = {38}\n"
-               "  Roof Anchor = {39}\n"
-               "  Cladding Type = {40}\n"
-               "  Roof Sheathing Attachment = {41}\n"
-               "  Frame Foundation Connection  = {42}\n"
-               "  Residential Appurtenant Structures = {43}\n"
-               "  Control Number = {44}\n"
-               .format(self.locNum,self.bldgNum, self.delete, self.physicalBuild, self.singlePhysical ,self.street1, self.street2, self.city, self.state, self.zipCode, self.county, self.valZip, self.buildVal, self.busPers, self.busIncome, self.miscReal, self.TIV, self.numUnits, self.buildDescrip, self.classCodeDesc, self.constType, self.distFireHydrant, self.distFireStation, self.protClass, self.numStories, self.numBasement, self.yearBuilt, self.sqFtg, self.wireY, self.plumbY, self.roofY, self.heatY, self.fireAlarmType, self.burgAlarmType, self.sprinklerAlarmType, self.sprinklerWetDry, self.sprinklerExtent, self.roofCovering, self.roofGeo, self.roofAnchor, self.cladType, self.roofSheath, self.frameConnection, self.resAppurtenant, self.CONTROLNUMBER)
+               "  Business Value = {11}\n"
+               "  Business Personal Property = {12}\n"
+               "  Business Income 	= {13}\n"
+               "  Misc Real Property = {14}\n"
+               "  # of Units = {15}\n"
+               "  Building Description = {16}\n"
+               "  ClassCodeDesc = {17}\n"
+               "  Construction Type = {18}\n"
+               "  Prot Class = {19}\n"
+               "  # of Stories = {20}\n"
+               "  # of Basements = {21}\n"
+               "  Year Built = {22}\n"
+               "  Sq Ftg = {23}\n"
+               "  Wiring Year = {24}\n"
+               "  Plumbing Year = {25}\n"
+               "  Roofing Year = {26}\n"
+               "  Heating Year = {27}\n"
+               "  Fire Alarm Type = {28}\n"
+               "  Burglar Alarm Type = {29}\n"
+               "  Sprinkler Alarm Type 	= {30}\n"
+               "  Sprinkler Wet/Dry = {31}\n"
+               "  Sprinkler Extent 	= {32}\n"
+               "  Roof Covering = {33}\n"
+               "  Roof Geometry = {34}\n"
+               "  Roof Anchor = {35}\n"
+               "  Cladding Type = {36}\n"
+               "  Roof Sheathing Attachment = {37}\n"
+               "  Frame Foundation Connection  = {38}\n"
+               "  Residential Appurtenant Structures = {39}\n"
+               "  Control Number = {40}\n"
+               .format(self.locNum,self.bldgNum, self.rawAddr, self.physicalBuild, self.singlePhysical ,self.street1, self.street2, self.city, self.state, self.zipCode, self.county, self.buildVal, self.busPers, self.busIncome, self.miscReal, self.numUnits, self.buildDescrip, self.classCodeDesc, self.constType, self.protClass, self.numStories, self.numBasement, self.yearBuilt, self.sqFtg, self.wireY, self.plumbY, self.roofY, self.heatY, self.fireAlarmType, self.burgAlarmType, self.sprinklerAlarmType, self.sprinklerWetDry, self.sprinklerExtent, self.roofCovering, self.roofGeo, self.roofAnchor, self.cladType, self.roofSheath, self.frameConnection, self.resAppurtenant, self.CONTROLNUMBER)
                )
 
-def getRecords(file,controlNum):
+def getRecords(file, controlNum):
 	"""pulls data from pycel converted SOV
 
 	Parameter file: the user selected file in a doubly nested array
@@ -204,7 +175,7 @@ def getRecords(file,controlNum):
 
 	Returns: Array of record objects"""
 
-	wb = open_workbook(file[0])
+	wb = open_workbook(str(file))
 	records = []
 	for sheet in wb.sheets():
 	    number_of_rows = sheet.nrows
@@ -221,6 +192,7 @@ def getRecords(file,controlNum):
 	                pass
 	            finally:
 	                values.append(value)
+			
 	        # Takes found data and converts it into a Record object        
 	        fullRow = Record(*values)
 	        # apply the inputted control number to the instance
@@ -242,14 +214,10 @@ def getRecords(file,controlNum):
 	return records
 
 
-def run():
+def run(pycelFile):
 	"""Master caller"""
-	file=ask()
-	controlNum=getControlNumber()
-	records=getRecords(file,controlNum)
+	file = pycelFile
+	controlNum = getControlNumber()
+	records = getRecords(pycelFile, controlNum)
 	commitToDatabase(records)
-
-# Lego
-run()
-
 

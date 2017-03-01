@@ -1,9 +1,9 @@
 import sovinput
 import sovmanip as modify
-# import pycelexport as exportToDB
 import os
 # TODO: import export <-- rename this
 
+userhome = os.path.expanduser('~/Desktop/')
 comparisonDic = {
     'Yr Bldg updated (Mand if >25 yrs)': 'Wiring Year',
     'name/address': 'Street 1',
@@ -289,5 +289,3 @@ modify.comp_converter(comparisonDic), header_row, input_sov)
 sub_header_data = modify.sliceSubHeaderData(header_row, sov_sheet)
 head_sub_combine = modify.combine(header_row, sub_header_data)
 modify.setnwrite(head_sub_combine, input_sov)
-
-# exportToDB.run()
