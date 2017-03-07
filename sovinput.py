@@ -1,6 +1,7 @@
 import Tkinter
 import os
 import sys
+import uuid
 from xlrd import open_workbook
 from unidecode import unidecode
 from tkFileDialog import askopenfilename

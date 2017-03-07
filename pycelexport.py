@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import pyodbc
+import uuid
 import Tkinter
 import tkSimpleDialog
 from xlrd import open_workbook
@@ -56,8 +57,8 @@ def commitToDatabase(records):
 	
 	Parameter records: array of Record objects"""
 	try:
-		cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=10.10.11.112;DATABASE=ABBYY_AppData;UID=svc-flexicap;PWD=svcflex')
-		# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=10.10.11.112;DATABASE=HermesLocationsBuildTest;UID=svc-flexicap;PWD=svcflex')
+		# cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=10.10.11.112;DATABASE=ABBYY_AppData;UID=svc-flexicap;PWD=svcflex')
+        	cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=10.0.0.46;DATABASE=ABBYY;UID=abbyy01;PWD=20@dEvAbbYY17!')
 		print "Connection established"
 	except:
 		print "Error: Failure to connect to the database, check your internet connection"

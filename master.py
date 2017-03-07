@@ -1,9 +1,9 @@
 import sovinput
 import sovmanip as modify
 import os
-# TODO: import export <-- rename this
+import uuid
 
-userhome = os.path.expanduser('~/Desktop/')
+
 comparisonDic = {
     'Yr Bldg updated (Mand if >25 yrs)': 'Wiring Year',
     'name/address': 'Street 1',
@@ -275,6 +275,7 @@ comparisonDic = {
     'heatingyear': 'Heating Year',
     'Location Street Address: ': 'Street 1'
 }
+userhome = os.path.expanduser('~/Desktop/')
 
 clear = lambda: os.system('cls')
 clear()
@@ -289,3 +290,5 @@ modify.comp_converter(comparisonDic), header_row, input_sov)
 sub_header_data = modify.sliceSubHeaderData(header_row, sov_sheet)
 head_sub_combine = modify.combine(header_row, sub_header_data)
 modify.setnwrite(head_sub_combine, input_sov)
+
+
