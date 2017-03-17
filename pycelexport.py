@@ -7,6 +7,7 @@ import Tkinter
 import tkSimpleDialog
 from xlrd import open_workbook
 from tkFileDialog import askopenfilename
+from tkinter import messagebox
 
 """
 This program is only for exporting the data received from the pycel converter
@@ -20,7 +21,6 @@ def openPromptValidate(caption, description):
 	
 	Parameter caption: appears as window name
 	Parameter description: text that appears above input box """
-
 	val = tkSimpleDialog.askstring(caption,description)
 	# value can only be a number with min length 6 and max length 7
 	val = re.search(r"^\d{6,7}$", val)
@@ -31,7 +31,8 @@ def openPromptValidate(caption, description):
 		return final
 	# val is None if no match, bad user input, recurse until correct
 	else:
-		final=openPromptValidate(caption,"Not a valid control number. Check your input and try again.")
+		messagebox.showinfo(message="The control number entered was not valid as input.\n Check your input and try again.\n\nIf problems persist, send an email to: support@rsgta.zohosupport.com")
+		final=openPromptValidate(caption,description)
 	return final
 
 def getControlNumber():
@@ -66,15 +67,6 @@ def commitToDatabase(records):
 	for row in records:
 		# only individual record executions
 		insertStatement(cnxn, row)
-	print "All Statements Executed Successfully, displaying contents:"
-
-	# display total database contents in terminal window for debug
-	# show = cnxn.cursor()
-	# show.execute("select * from dbo.pycelSOV")	
-	# rows = show.fetchall()
-	# print "Database Contents: \n "
-	# for row in range(len(rows)):
-	# 	print "Row number %s : %s" %( row, rows[row])
 
 class Record(object):
 	"""" represents each row as an object where each attribute corresponds to a column from the workstation"""
@@ -200,18 +192,6 @@ def getRecords(file, controlNum):
 	        fullRow.CONTROLNUMBER=controlNum
 	        # container for all the Record objects
 	        records.append(fullRow)
-
-	# Terminal display
-	for rowIndex in range(len(records)):
-		print "Row %s:\n %s" %(rowIndex, records[rowIndex])
-
-		# Now everything is accessible as an object (yes!), so for example to get the street1 do records[rowIndex].street1
-		# Easy for finding the value for the SQL kickout
-
-		# or if you want to just print out everything...
-		# for attr, value in records[rowIndex].__dict__.iteritems():
-			# print attr, value
-
 	return records
 
 
